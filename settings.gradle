@@ -1,0 +1,5 @@
+rootProject.name = 'fms'
+
+include 'modules:core'
+include 'modules:core-mybatis'
+include 'modules:crypto'

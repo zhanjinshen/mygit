@@ -1,0 +1,24 @@
+ext {
+    bouncyVersion = '1.54'
+    jodaTimeVersion = '2.6'
+}
+
+dependencies {
+    compile "org.bouncycastle:bcprov-jdk15on:$bouncyVersion"
+    compile "org.bouncycastle:bcpkix-jdk15on:$bouncyVersion"
+    compile "joda-time:joda-time:$jodaTimeVersion"
+}
+
+task uberjar(type: Jar, dependsOn: jar) {
+    classifier = "standalone"
+    version = ''
+
+    from files(sourceSets.main.output.classesDir)
+    from files(sourceSets.main.output.resourcesDir)
+
+    from configurations.runtime.asFileTree.files.collect { zipTree(it) }
+
+    exclude("META-INF/*.SF")
+    exclude("META-INF/*.DSA")
+    exclude("META-INF/*.RSA")
+}

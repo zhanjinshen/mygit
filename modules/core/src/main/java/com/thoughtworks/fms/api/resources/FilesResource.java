@@ -1,0 +1,123 @@
+package com.thoughtworks.fms.api.resources;
+
+import com.google.common.base.Splitter;
+import com.thoughtworks.fms.api.Json;
+import com.thoughtworks.fms.api.filter.SystemAuthentication;
+import com.thoughtworks.fms.api.service.ClientService;
+import com.thoughtworks.fms.api.service.FileService;
+import com.thoughtworks.fms.api.service.SessionService;
+import com.thoughtworks.fms.api.service.ValidationService;
+import com.thoughtworks.fms.core.FileMetadata;
+import com.thoughtworks.fms.core.FileRepository;
+import org.apache.commons.io.IOUtils;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.stream.Collectors.toList;
+
+@Path("files")
+public class FilesResource {
+
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response uploadFile(FormDataMultiPart multiPart,
+                               @FormDataParam("file") FormDataContentDisposition metadata,
+                               @Context ServerProperties properties,
+                               @Context HttpServletRequest servletRequest,
+                               @Context FileService fileService,
+                               @Context ValidationService validationService,
+                               @Context ClientService clientService,
+                               @Context SessionService sessionService) {
+        FormDataBodyPart field = multiPart.getField("upload_token");
+        validationService.ensureUploadTokenValid(field);
+
+        Map attribute = Json.parseJson(sessionService.getAttribute(servletRequest,
+                properties.getUploadTokenKey(field.getValueAs(String.class))).toString(), Map.class);
+        sessionService.removeAttribute(servletRequest, properties.getUploadTokenKey(field.getValueAs(String.class)));
+
+        String destName = attribute.get("fileName").toString();
+        String uri = attribute.get("uri").toString();
+
+        InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
+        long fileId = fileService.store(metadata.getFileName(), destName, inputStream);
+        clientService.informUms(uri, fileId);
+
+        return Response.created(Routing.file(fileId)).build();
+    }
+
+    @GET
+    @Path("{fileId}")
+    public Response downloadFile(@PathParam("fileId") long fileId,
+                                 @QueryParam("download_token") String token,
+                                 @Context ContainerRequestContext context,
+                                 @Context ServerProperties properties,
+                                 @Context HttpServletRequest servletRequest,
+                                 @Context FileService fileService,
+                                 @Context ValidationService validationService,
+                                 @Context SessionService sessionService,
+                                 @Context FileRepository fileRepository) {
+        validationService.ensureDownloadTokenValid(token);
+
+        Map attribute = Json.parseJson(sessionService.getAttribute(servletRequest,
+                properties.getDownloadTokenKey(token)).toString(), Map.class);
+        sessionService.removeAttribute(servletRequest, properties.getDownloadTokenKey(token));
+
+        long sessionFileId = Long.valueOf(attribute.get("fileId").toString());
+
+        if (fileId != sessionFileId) {
+            throw new NotAuthorizedException("The user does not have rights to download file.");
+        }
+
+        FileMetadata metadata = fileRepository.findMetadataById(fileId);
+        InputStream inputStream = fileService.fetch(metadata.getName());
+        StreamingOutput streamingOutput = output -> IOUtils.copy(inputStream, output);
+        String fileName = metadata.getName().replaceAll(".*/(.*)", "$1");
+
+        return Response
+                .ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
+                .header("content-disposition", "attachment; filename=" + fileName + metadata.getSuffix())
+                .build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @SystemAuthentication(system = "midas")
+    public Response downloadFiles(@QueryParam("fileIds") String fileIds,
+                                  @Context ContainerRequestContext context,
+                                  @Context HttpServletRequest servletRequest,
+                                  @Context FileService fileService) {
+        List<Long> fileIdsList = Splitter.on(",").splitToList(fileIds)
+                .stream().map(Long::valueOf).collect(toList());
+
+        final File zipFile = fileService.fetch(fileIdsList);
+        StreamingOutput streamingOutput = output -> {
+            try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(zipFile))) {
+                IOUtils.copy(inputStream, output);
+            } finally {
+                zipFile.delete();
+            }
+        };
+
+        return Response
+                .ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
+                .header("content-disposition", "attachment; filename=" + zipFile.getName())
+                .build();
+    }
+
+}

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="mybatis.properties"/>
+    <typeHandlers>
+        <typeHandler handler="com.thoughtworks.fms.core.mybatis.handler.DateTimeTypeHandler"
+                     javaType="org.joda.time.DateTime"/>
+        <typeHandler handler="com.thoughtworks.fms.core.mybatis.handler.MoneyTypeHandler"
+                     javaType="org.joda.money.Money"/>
+    </typeHandlers>
+    <objectFactory type="com.thoughtworks.fms.core.mybatis.factory.ObjectFactory"/>
+    <environments default="env">
+        <environment id="env">
+            <transactionManager type="JDBC">
+                <property name="closeConnection" value="false"/>
+                <property name="autoCommit" value="false"/>
+            </transactionManager>
+            <dataSource type="POOLED">
+                <property name="driver" value="${db_driver}"/>
+                <property name="url" value="${db_url}"/>
+                <property name="username" value="${db_user}"/>
+                <property name="password" value="${db_password}"/>
+                <property name="driver.encoding" value="UTF8"/>
+                <property name="poolMaximumActiveConnections" value="${maxActiveConnections}"/>
+                <property name="poolMaximumIdleConnections" value="${maxIdleConnections}"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="mybatis/mappers/Columns.xml"/>
+        <mapper resource="mybatis/mappers/Records.xml"/>
+        <mapper resource="mybatis/mappers/FileMetadataMapper.xml"/>
+    </mappers>
+</configuration>

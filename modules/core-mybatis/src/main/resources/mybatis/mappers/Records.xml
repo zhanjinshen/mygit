@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="records">
+
+    <resultMap id="fileMetadata" type="com.thoughtworks.fms.core.mybatis.records.FileMetadata">
+        <id column="FFM_ID" property="id"/>
+        <result column="FFM_SUFFIX" property="suffix"/>
+        <result column="FFM_NAME" property="name"/>
+        <result column="FFM_SIZE" property="size"/>
+        <result column="FFM_CREATED_AT" property="createdAt"/>
+    </resultMap>
+
+</mapper>

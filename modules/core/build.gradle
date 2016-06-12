@@ -1,0 +1,15 @@
+ext {
+    jodaTimeVersion = '2.6'
+    jaxrsVersion = "2.0"
+    servletApiVersion = '3.0.1'
+    fastxmlVersion = '2.5.4'
+}
+
+dependencies {
+    compile "javax.servlet:javax.servlet-api:$servletApiVersion"
+    compile "javax.ws.rs:javax.ws.rs-api:$jaxrsVersion"
+    compile "org.glassfish.jersey.media:jersey-media-multipart:$jerseyVersion"
+    compile "joda-time:joda-time:$jodaTimeVersion"
+    compile "com.fasterxml.jackson.core:jackson-core:$fastxmlVersion"
+    compile "com.fasterxml.jackson.core:jackson-databind:$fastxmlVersion"
+}

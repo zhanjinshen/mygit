@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thoughtworks.fms.core.mybatis.mappers.FileMetadataMapper">
+    <insert id="createMetadata" useGeneratedKeys="true" keyProperty="piggyback.id" keyColumn="id">
+        INSERT INTO FMS_FILE_METADATA(SUFFIX, NAME, SIZE)
+        VALUES (#{suffix}, #{name}, #{fileSize})
+    </insert>
+
+    <select id="findMetadataById" resultMap="records.fileMetadata">
+        SELECT
+        <include refid="columns.fileMetadata"/>
+        FROM FMS_FILE_METADATA FFM
+        WHERE FFM.ID = #{id}
+    </select>
+
+    <select id="findMetadataByIds" resultMap="records.fileMetadata">
+        SELECT
+        <include refid="columns.fileMetadata"/>
+        FROM FMS_FILE_METADATA FFM
+        WHERE FFM.ID IN
+        <foreach collection="ids" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+</mapper>
