@@ -65,7 +65,7 @@ public class DefaultFileService implements FileService {
             throw new InternalServerException(FMSErrorCode.UPLOAD_FILE_FAIL);
         }
 
-        return repository.storeMetadata("." + suffix, destName, count);
+        return repository.storeMetadata(sourceName, destName, "." + suffix, count);
     }
 
     private String getAcceptedSuffix(String name) {
@@ -102,9 +102,9 @@ public class DefaultFileService implements FileService {
         List<FileMetadata> metadatas = repository.findMetadataByIds(fileIds);
         List<Entry> entries = metadatas.stream().parallel()
                 .map(metadata -> {
-                    String fileName = metadata.getName() + metadata.getSuffix();
+                    String fileName = metadata.getDestName() + metadata.getSuffix();
                     fileName = fileName.replaceAll(".*/(.*)", "$1");
-                    return new Entry(fileName, fetch(metadata.getName()));
+                    return new Entry(fileName, fetch(metadata.getDestName()));
                 }).collect(toList());
 
         return compressZip(entries);

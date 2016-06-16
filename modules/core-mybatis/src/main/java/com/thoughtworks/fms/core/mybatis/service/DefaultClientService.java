@@ -19,9 +19,10 @@ public class DefaultClientService implements ClientService {
     private static final RestClient CLIENT = new RestClient();
 
     @Override
-    public void informUms(String uri, Long fileId) {
+    public void informUms(String uri, Long fileId, String fileName) {
         Map<String, Object> entity = new HashMap<>();
         entity.put("fileId", fileId);
+        entity.put("fileName", fileName);
 
         LOGGER.debug("System Log: The callback url of ums is: " + UMS_URI + uri);
 

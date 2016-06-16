@@ -6,8 +6,9 @@
 
     <resultMap id="fileMetadata" type="com.thoughtworks.fms.core.mybatis.records.FileMetadata">
         <id column="FFM_ID" property="id"/>
+        <result column="FFM_SOURCE_NAME" property="sourceName"/>
+        <result column="FFM_DEST_NAME" property="destName"/>
         <result column="FFM_SUFFIX" property="suffix"/>
-        <result column="FFM_NAME" property="name"/>
         <result column="FFM_SIZE" property="size"/>
         <result column="FFM_CREATED_AT" property="createdAt"/>
     </resultMap>

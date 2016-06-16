@@ -6,8 +6,9 @@
 
     <sql id="fileMetadata">
         FFM.ID          AS FFM_ID,
+        FFM.SOURCE_NAME AS FFM_SOURCE_NAME,
+        FFM.DEST_NAME   AS FFM_DEST_NAME,
         FFM.SUFFIX      AS FFM_SUFFIX,
-        FFM.NAME        AS FFM_NAME,
         FFM.SIZE        AS FFM_SIZE,
         FFM.CREATED_AT  AS FFM_CREATED_AT
     </sql>

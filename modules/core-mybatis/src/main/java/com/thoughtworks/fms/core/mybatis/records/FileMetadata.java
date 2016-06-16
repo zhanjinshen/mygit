@@ -6,7 +6,8 @@ public class FileMetadata implements com.thoughtworks.fms.core.FileMetadata {
 
     private long id;
     private String suffix;
-    private String name;
+    private String sourceName;
+    private String destName;
     private long size;
     private DateTime createdAt;
 
@@ -21,8 +22,13 @@ public class FileMetadata implements com.thoughtworks.fms.core.FileMetadata {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    @Override
+    public String getDestName() {
+        return destName;
     }
 
     @Override

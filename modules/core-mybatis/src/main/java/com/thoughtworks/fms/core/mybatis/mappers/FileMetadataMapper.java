@@ -8,8 +8,9 @@ import java.util.Map;
 
 public interface FileMetadataMapper {
 
-    void createMetadata(@Param("suffix") String suffix,
-                        @Param("name") String name,
+    void createMetadata(@Param("sourceName") String sourceName,
+                        @Param("destName") String destName,
+                        @Param("suffix") String suffix,
                         @Param("fileSize") long size,
                         @Param("piggyback") Map<String, Long> piggyback);
 

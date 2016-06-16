@@ -18,9 +18,9 @@ public class FileRepository implements com.thoughtworks.fms.core.FileRepository 
     private FileMetadataMapper metadataMapper;
 
     @Override
-    public long storeMetadata(String suffix, String name, long size) {
+    public long storeMetadata(String sourceName, String destName, String suffix, long size) {
         Map<String, Long> piggyback = new HashMap<>();
-        metadataMapper.createMetadata(suffix, name, size, piggyback);
+        metadataMapper.createMetadata(sourceName, destName, suffix, size, piggyback);
         return piggyback.get("id");
     }
 

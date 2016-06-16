@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface FileRepository {
 
-    long storeMetadata(String suffix, String name, long size);
+    long storeMetadata(String sourceName, String destName, String suffix, long size);
 
     FileMetadata findMetadataById(long fileId);
 

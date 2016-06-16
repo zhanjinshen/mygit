@@ -36,8 +36,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static java.nio.charset.Charset.defaultCharset;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -87,7 +86,7 @@ public class FilesResourceTest extends ResourceTest {
 
         assertThat(metadata.getId(), greaterThan(0L));
         assertThat(metadata.getSuffix(), is(".png"));
-        assertThat(metadata.getName().length(), greaterThan(0));
+        assertThat(metadata.getDestName().length(), greaterThan(0));
     }
 
     @Test
@@ -172,7 +171,7 @@ public class FilesResourceTest extends ResourceTest {
         cipher.encrypt(new FileInputStream(testFile), outputStream);
         when(transfer.read(any())).thenReturn(new ByteArrayInputStream(outputStream.toByteArray()));
 
-        WebTarget downloadWebTarget = uploadWebTarget.path(fileId + "").queryParam("download_token", "hello");
+        WebTarget downloadWebTarget = uploadWebTarget.path("type").queryParam("download_token", "hello");
         Response downloadResponse = downloadWebTarget.request()
                 .cookie("_csrf", "csrf_token")
                 .header("CSRF-TOKEN", "csrf_token")
@@ -182,9 +181,8 @@ public class FilesResourceTest extends ResourceTest {
         InputStream inputStream = downloadResponse.readEntity(InputStream.class);
 
         File file = new FileBuilder(fileName).withContent(inputStream).getFile();
-
-        assertThat(FileUtils.readLines(testFile, defaultCharset()), is(FileUtils.readLines(file, defaultCharset())));
         assertThat(downloadResponse.getStatus(), is(HttpStatus.OK_200.getStatusCode()));
+        assertThat(file.length(), greaterThan(0L));
     }
 
     @Test
@@ -320,9 +318,11 @@ public class FilesResourceTest extends ResourceTest {
         return Json.toJson(attribute);
     }
 
-    private String validDownloadSessionAttribute(long fileId) {
+    private String validDownloadSessionAttribute(Long... fileIds) {
         Map<String, Object> attribute = new HashMap<>();
-        attribute.put("fileId", fileId);
+        String join = Joiner.on(",").join(Arrays.asList(fileIds));
+
+        attribute.put("fileIds", join);
         return Json.toJson(attribute);
     }
 

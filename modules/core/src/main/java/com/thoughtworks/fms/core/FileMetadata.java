@@ -8,7 +8,9 @@ public interface FileMetadata {
 
     String getSuffix();
 
-    String getName();
+    String getSourceName();
+
+    String getDestName();
 
     long getSize();
 

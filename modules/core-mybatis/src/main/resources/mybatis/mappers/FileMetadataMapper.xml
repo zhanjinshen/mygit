@@ -4,8 +4,8 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.thoughtworks.fms.core.mybatis.mappers.FileMetadataMapper">
     <insert id="createMetadata" useGeneratedKeys="true" keyProperty="piggyback.id" keyColumn="id">
-        INSERT INTO FMS_FILE_METADATA(SUFFIX, NAME, SIZE)
-        VALUES (#{suffix}, #{name}, #{fileSize})
+        INSERT INTO FMS_FILE_METADATA(SOURCE_NAME, DEST_NAME, SUFFIX, SIZE)
+        VALUES (#{sourceName}, #{destName}, #{suffix}, #{fileSize})
     </insert>
 
     <select id="findMetadataById" resultMap="records.fileMetadata">

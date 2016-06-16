@@ -25,7 +25,7 @@ public class ResourceTest extends JerseyTest {
 
         doNothing().when(TestResourceConfig.transfer).write(any(), any());
         doNothing().when(TestResourceConfig.sessionService).removeAttribute(any(), any());
-        doNothing().when(TestResourceConfig.clientService).informUms(any(), any());
+        doNothing().when(TestResourceConfig.clientService).informUms(any(), any(), any());
     }
 
     @Override

@@ -7,8 +7,6 @@ import com.thoughtworks.fms.api.service.ClientService;
 import com.thoughtworks.fms.api.service.FileService;
 import com.thoughtworks.fms.api.service.SessionService;
 import com.thoughtworks.fms.api.service.ValidationService;
-import com.thoughtworks.fms.core.FileMetadata;
-import com.thoughtworks.fms.core.FileRepository;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -22,10 +20,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +38,7 @@ public class FilesResource {
                                @Context FileService fileService,
                                @Context ValidationService validationService,
                                @Context ClientService clientService,
-                               @Context SessionService sessionService) {
+                               @Context SessionService sessionService) throws UnsupportedEncodingException {
         FormDataBodyPart field = multiPart.getField("upload_token");
         validationService.ensureUploadTokenValid(field);
 
@@ -54,45 +49,31 @@ public class FilesResource {
         String destName = attribute.get("fileName").toString();
         String uri = attribute.get("uri").toString();
 
+        String sourceName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
         InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
-        long fileId = fileService.store(metadata.getFileName(), destName, inputStream);
-        clientService.informUms(uri, fileId);
+        long fileId = fileService.store(sourceName, destName, inputStream);
+        clientService.informUms(uri, fileId, sourceName);
 
         return Response.created(Routing.file(fileId)).build();
     }
 
     @GET
-    @Path("{fileId}")
-    public Response downloadFile(@PathParam("fileId") long fileId,
+    @Path("{type}")
+    public Response downloadFile(@PathParam("type") String type,
                                  @QueryParam("download_token") String token,
-                                 @Context ContainerRequestContext context,
                                  @Context ServerProperties properties,
                                  @Context HttpServletRequest servletRequest,
                                  @Context FileService fileService,
                                  @Context ValidationService validationService,
-                                 @Context SessionService sessionService,
-                                 @Context FileRepository fileRepository) {
+                                 @Context SessionService sessionService) {
         validationService.ensureDownloadTokenValid(token);
 
         Map attribute = Json.parseJson(sessionService.getAttribute(servletRequest,
                 properties.getDownloadTokenKey(token)).toString(), Map.class);
         sessionService.removeAttribute(servletRequest, properties.getDownloadTokenKey(token));
 
-        long sessionFileId = Long.valueOf(attribute.get("fileId").toString());
-
-        if (fileId != sessionFileId) {
-            throw new NotAuthorizedException("The user does not have rights to download file.");
-        }
-
-        FileMetadata metadata = fileRepository.findMetadataById(fileId);
-        InputStream inputStream = fileService.fetch(metadata.getName());
-        StreamingOutput streamingOutput = output -> IOUtils.copy(inputStream, output);
-        String fileName = metadata.getName().replaceAll(".*/(.*)", "$1");
-
-        return Response
-                .ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
-                .header("content-disposition", "attachment; filename=" + fileName + metadata.getSuffix())
-                .build();
+        String fileIds = attribute.get("fileIds").toString();
+        return getResponse(fileService, fileIds);
     }
 
     @GET
@@ -102,6 +83,10 @@ public class FilesResource {
                                   @Context ContainerRequestContext context,
                                   @Context HttpServletRequest servletRequest,
                                   @Context FileService fileService) {
+        return getResponse(fileService, fileIds);
+    }
+
+    private Response getResponse(FileService fileService, String fileIds) {
         List<Long> fileIdsList = Splitter.on(",").splitToList(fileIds)
                 .stream().map(Long::valueOf).collect(toList());
 
