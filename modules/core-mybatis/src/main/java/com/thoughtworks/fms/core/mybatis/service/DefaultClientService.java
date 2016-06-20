@@ -26,7 +26,7 @@ public class DefaultClientService implements ClientService {
 
         LOGGER.debug("System Log: The callback url of ums is: " + UMS_URI + uri);
 
-        CLIENT.put(UMS_URI + uri, entity, (Response response) -> {
+        CLIENT.post(UMS_URI + uri, entity, (Response response) -> {
             if (response.getStatus() != HttpStatus.NO_CONTENT_204.getStatusCode()) {
                 LOGGER.error("System Log: Error callback ums with status:{} detail message: {}",
                         response.getStatus(), response);

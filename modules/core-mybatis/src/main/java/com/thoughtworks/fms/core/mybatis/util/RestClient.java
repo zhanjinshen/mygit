@@ -24,7 +24,7 @@ public class RestClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(RestClient.class);
     private static final String UMS_AUTH_SECRET = PropertiesLoader.getProperty("fms.secret");
 
-    public <T> T put(String url, Object entity, Function<Response, T> handler) {
+    public <T> T post(String url, Object entity, Function<Response, T> handler) {
         Client client = ClientBuilder.newClient();
         Response response = null;
         try {
@@ -34,7 +34,7 @@ public class RestClient {
                     .header("MIDAS-TIMESTAMP", timestamp)
                     .header("MIDAS-SYSTEM", "fms")
                     .header("MIDAS-MD5", getMd5(entity, timestamp))
-                    .put(Entity.json(entity));
+                    .post(Entity.json(entity));
             return handler.apply(response);
         } finally {
             closeConnection(response);
