@@ -6,4 +6,8 @@ public class InvalidRequestException extends FMSRuntimeException {
         super(errorCode, args);
     }
 
+    public InvalidRequestException(FMSErrorCode errorCode, Throwable cause, Object... args) {
+        super(errorCode, cause, args);
+    }
+
 }

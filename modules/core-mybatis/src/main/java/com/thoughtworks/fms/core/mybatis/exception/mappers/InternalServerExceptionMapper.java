@@ -22,7 +22,7 @@ public class InternalServerExceptionMapper implements ExceptionMapper<InternalSe
 
         final Map<String, String> exceptionMap = new HashMap<>();
         exceptionMap.put("code", exception.getCode().toString());
-        exceptionMap.put("message", exception.getMessage() == null ? "" : exception.getMessage());
+        exceptionMap.put("message", exception.getMessage());
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(exceptionMap)
                 .type(MediaType.APPLICATION_JSON_TYPE).build();

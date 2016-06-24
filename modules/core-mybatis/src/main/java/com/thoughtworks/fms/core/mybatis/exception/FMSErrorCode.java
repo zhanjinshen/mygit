@@ -24,7 +24,7 @@ public enum FMSErrorCode {
     }
 
     public String getMessageTemplate() {
-        return errorProperties.getProperty(value);
+        return errorProperties.getProperty(value, "");
     }
 
 }

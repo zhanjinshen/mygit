@@ -3,7 +3,7 @@ package com.thoughtworks.fms.core.mybatis.records;
 import com.thoughtworks.fms.core.FileMetadata;
 import com.thoughtworks.fms.core.mybatis.exception.FMSErrorCode;
 import com.thoughtworks.fms.core.mybatis.exception.InvalidRequestException;
-import com.thoughtworks.fms.core.mybatis.exception.NotFoundException;
+import com.thoughtworks.fms.core.mybatis.exception.EntityNotFoundException;
 import com.thoughtworks.fms.core.mybatis.mappers.FileMetadataMapper;
 
 import javax.inject.Inject;
@@ -29,7 +29,7 @@ public class FileRepository implements com.thoughtworks.fms.core.FileRepository 
         FileMetadata metadata = metadataMapper.findMetadataById(fileId);
 
         if (Objects.isNull(metadata)) {
-            throw new NotFoundException(FMSErrorCode.RESOURCE_NOT_FOUND, fileId);
+            throw new EntityNotFoundException(FMSErrorCode.RESOURCE_NOT_FOUND, fileId);
         }
 
         return metadata;

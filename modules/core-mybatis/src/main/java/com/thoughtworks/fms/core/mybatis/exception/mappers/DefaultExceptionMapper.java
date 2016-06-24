@@ -13,14 +13,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Provider
-public class DefaultExceptionMapper implements ExceptionMapper<Throwable> {
+public class DefaultExceptionMapper implements ExceptionMapper<Exception> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultExceptionMapper.class);
 
-    public Response toResponse(Throwable t) {
-        LOGGER.error(ExceptionUtils.getFullStackTrace(t));
+    public Response toResponse(Exception exception) {
+        LOGGER.error(ExceptionUtils.getFullStackTrace(exception));
 
-        if (t instanceof WebApplicationException) {
-            return ((WebApplicationException) t).getResponse();
+        if (exception instanceof WebApplicationException) {
+            return ((WebApplicationException) exception).getResponse();
         } else {
             final Map<String, Object> error = new HashMap<>();
             error.put("code", "SERVER_ERROR");
