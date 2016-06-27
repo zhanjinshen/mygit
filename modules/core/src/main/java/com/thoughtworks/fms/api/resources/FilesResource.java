@@ -21,8 +21,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 
@@ -65,7 +67,7 @@ public class FilesResource {
                                  @Context HttpServletRequest servletRequest,
                                  @Context FileService fileService,
                                  @Context ValidationService validationService,
-                                 @Context SessionService sessionService) {
+                                 @Context SessionService sessionService) throws UnsupportedEncodingException {
         validationService.ensureDownloadTokenValid(token);
 
         Map attribute = Json.parseJson(sessionService.getAttribute(servletRequest,
@@ -73,7 +75,8 @@ public class FilesResource {
         sessionService.removeAttribute(servletRequest, properties.getDownloadTokenKey(token));
 
         String fileIds = attribute.get("fileIds").toString();
-        return getResponse(fileService, fileIds);
+        String fileName = attribute.get("fileName").toString();
+        return getResponse(fileService, fileIds, fileName);
     }
 
     @GET
@@ -82,15 +85,16 @@ public class FilesResource {
     public Response downloadFiles(@QueryParam("fileIds") String fileIds,
                                   @Context ContainerRequestContext context,
                                   @Context HttpServletRequest servletRequest,
-                                  @Context FileService fileService) {
-        return getResponse(fileService, fileIds);
+                                  @Context FileService fileService) throws UnsupportedEncodingException {
+        String fileName = UUID.randomUUID().toString();
+        return getResponse(fileService, fileIds, fileName);
     }
 
-    private Response getResponse(FileService fileService, String fileIds) {
+    private Response getResponse(FileService fileService, String fileIds, String fileName) throws UnsupportedEncodingException {
         List<Long> fileIdsList = Splitter.on(",").splitToList(fileIds)
                 .stream().map(Long::valueOf).collect(toList());
 
-        final File zipFile = fileService.fetch(fileIdsList);
+        final File zipFile = fileService.fetch(fileIdsList, fileName);
         StreamingOutput streamingOutput = output -> {
             try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(zipFile))) {
                 IOUtils.copy(inputStream, output);
@@ -99,9 +103,10 @@ public class FilesResource {
             }
         };
 
+//        String downLoadName = new String(zipFile.getName().getBytes("gb2312"), "iso8859-1");
         return Response
                 .ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
-                .header("content-disposition", "attachment; filename=" + zipFile.getName())
+                .header("content-disposition", "attachment; filename=" + URLEncoder.encode(zipFile.getName(), "UTF-8"))
                 .build();
     }
 

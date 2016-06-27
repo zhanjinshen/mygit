@@ -10,6 +10,6 @@ public interface FileService {
 
     InputStream fetch(String destName);
 
-    File fetch(List<Long> fileIds);
+    File fetch(List<Long> fileIds, String zipFileName);
 
 }

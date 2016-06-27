@@ -15,9 +15,6 @@ import com.thoughtworks.fms.core.mybatis.util.PropertiesLoader;
 import com.thoughtworks.fms.exception.DecryptionException;
 import com.thoughtworks.fms.exception.EncryptionException;
 import com.thoughtworks.fms.exception.TransferException;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.*;
@@ -30,7 +27,6 @@ import java.util.zip.ZipOutputStream;
 import static java.util.stream.Collectors.toList;
 
 public class DefaultFileService implements FileService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFileService.class);
     private static final int BUFFER = 2048;
     private static final int EOF = -1;
     private static List<String> ACCEPT_EXTENSIONS = Splitter.on(",")
@@ -61,8 +57,7 @@ public class DefaultFileService implements FileService {
                 transfer.write(destName, encryptedInputStream);
             }
         } catch (TransferException | IOException | EncryptionException e) {
-            LOGGER.error(ExceptionUtils.getFullStackTrace(e));
-            throw new InternalServerException(FMSErrorCode.UPLOAD_FILE_FAIL);
+            throw new InternalServerException(FMSErrorCode.UPLOAD_FILE_FAIL, e);
         }
 
         return repository.storeMetadata(sourceName, destName, "." + suffix, count);
@@ -90,15 +85,14 @@ public class DefaultFileService implements FileService {
             InputStream encryptedStream = transfer.read(destName);
             cipher.decrypt(encryptedStream, decryptedStream);
         } catch (TransferException | DecryptionException e) {
-            LOGGER.error(ExceptionUtils.getFullStackTrace(e));
-            throw new InternalServerException(FMSErrorCode.DOWNLOAD_FILE_FAIL);
+            throw new InternalServerException(FMSErrorCode.DOWNLOAD_FILE_FAIL, e);
         }
 
         return new ByteArrayInputStream(decryptedStream.toByteArray());
     }
 
     @Override
-    public File fetch(List<Long> fileIds) {
+    public File fetch(List<Long> fileIds, String zipFileName) {
         List<FileMetadata> metadatas = repository.findMetadataByIds(fileIds);
         List<Entry> entries = metadatas.stream().parallel()
                 .map(metadata -> {
@@ -107,11 +101,11 @@ public class DefaultFileService implements FileService {
                     return new Entry(fileName, fetch(metadata.getDestName()));
                 }).collect(toList());
 
-        return compressZip(entries);
+        return compressZip(zipFileName, entries);
     }
 
-    private File compressZip(List<Entry> entries) {
-        File zipFile = FileBuilder.builder(".zip").build();
+    private File compressZip(String zipFileName, List<Entry> entries) {
+        File zipFile = FileBuilder.builder(zipFileName + ".zip").build();
         try (ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile), BUFFER))) {
             byte data[] = new byte[BUFFER];
 
@@ -127,8 +121,7 @@ public class DefaultFileService implements FileService {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getFullStackTrace(e));
-            throw new InternalServerException(FMSErrorCode.SERVER_INTERNAL_ERROR);
+            throw new InternalServerException(FMSErrorCode.SERVER_INTERNAL_ERROR, e);
         }
 
         return zipFile;

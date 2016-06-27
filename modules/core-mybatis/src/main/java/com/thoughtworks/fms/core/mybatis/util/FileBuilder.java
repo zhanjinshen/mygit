@@ -25,8 +25,8 @@ public class FileBuilder {
         return new FileBuilder(DateTimeHelper.appendDateTimeStr(UUID.randomUUID().toString(), "-"));
     }
 
-    public static FileBuilder builder(String suffix) {
-        return new FileBuilder(DateTimeHelper.appendDateTimeStr(UUID.randomUUID().toString(), "-") + suffix);
+    public static FileBuilder builder(String name) {
+        return new FileBuilder(name);
     }
 
     public FileBuilder withContent(String content) {

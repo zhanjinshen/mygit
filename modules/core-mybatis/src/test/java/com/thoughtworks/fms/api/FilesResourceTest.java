@@ -17,7 +17,6 @@ import com.thoughtworks.fms.core.mybatis.util.PropertiesLoader;
 import com.thoughtworks.fms.core.mybatis.util.RestClient;
 import com.thoughtworks.fms.exception.EncryptionException;
 import com.thoughtworks.fms.exception.TransferException;
-import org.apache.commons.io.FileUtils;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -38,7 +37,6 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.util.*;
 
-import static java.nio.charset.Charset.defaultCharset;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.Is.is;
@@ -323,6 +321,7 @@ public class FilesResourceTest extends ResourceTest {
         String join = Joiner.on(",").join(Arrays.asList(fileIds));
 
         attribute.put("fileIds", join);
+        attribute.put("fileName", "测试1234-f");
         return Json.toJson(attribute);
     }
 
