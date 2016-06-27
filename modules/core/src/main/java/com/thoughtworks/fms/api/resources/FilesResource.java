@@ -12,6 +12,8 @@ import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -30,6 +32,7 @@ import static java.util.stream.Collectors.toList;
 
 @Path("files")
 public class FilesResource {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilesResource.class);
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -76,7 +79,8 @@ public class FilesResource {
 
         String fileIds = attribute.get("fileIds").toString();
         String fileName = attribute.get("fileName").toString();
-        return getResponse(fileService, fileIds, fileName);
+        String userAgent = servletRequest.getHeader("User-Agent");
+        return getResponse(fileService, fileIds, fileName, userAgent);
     }
 
     @GET
@@ -87,10 +91,11 @@ public class FilesResource {
                                   @Context HttpServletRequest servletRequest,
                                   @Context FileService fileService) throws UnsupportedEncodingException {
         String fileName = UUID.randomUUID().toString();
-        return getResponse(fileService, fileIds, fileName);
+        String userAgent = servletRequest.getHeader("User-Agent");
+        return getResponse(fileService, fileIds, fileName, userAgent);
     }
 
-    private Response getResponse(FileService fileService, String fileIds, String fileName) throws UnsupportedEncodingException {
+    private Response getResponse(FileService fileService, String fileIds, String fileName, String userAgent) throws UnsupportedEncodingException {
         List<Long> fileIdsList = Splitter.on(",").splitToList(fileIds)
                 .stream().map(Long::valueOf).collect(toList());
 
@@ -103,11 +108,20 @@ public class FilesResource {
             }
         };
 
-//        String downLoadName = new String(zipFile.getName().getBytes("gb2312"), "iso8859-1");
         return Response
                 .ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
-                .header("content-disposition", "attachment; filename=" + URLEncoder.encode(zipFile.getName(), "UTF-8"))
+                .header("content-disposition", getContentDispositionFileName(userAgent, zipFile.getName()))
                 .build();
+    }
+
+    private String getContentDispositionFileName(String userAgent, String fileName) throws UnsupportedEncodingException {
+        LOGGER.debug("userAgent=" + userAgent);
+        if (userAgent.indexOf("MSIE") != -1) {
+            return "attachment; filename=\"" + URLEncoder.encode(fileName, "UTF-8") + "\"";
+        } else {
+            return "attachment; filename*=UTF-8''" + URLEncoder.encode(fileName, "UTF-8");
+        }
+
     }
 
 }
