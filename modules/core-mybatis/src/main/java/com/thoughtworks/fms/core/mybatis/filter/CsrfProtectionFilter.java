@@ -51,15 +51,24 @@ public class CsrfProtectionFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
+        String url = requestContext.getUriInfo().getAbsolutePath().toASCIIString();
+        String userAgent = requestContext.getHeaderString("user-agent");
         Cookie cookie = requestContext.getCookies().get(CSRF_COOKIE_NAME);
         String headerValue = requestContext.getHeaderString(CSRF_HEADER_NAME);
+        String method = requestContext.getMethod();
 
-        if (requestContext.getMethod().equals("GET")) {
+        if (method.equals("GET")) {
             if (Objects.isNull(cookie)) {
                 LOGGER.debug("System Log: set csrf cookie");
                 response.addHeader("SET-COOKIE", buildCookieHeader(generateCsrfCookie(CSRF_COOKIE_NAME)));
             }
 
+            return;
+        }
+
+        // IE 8,9 compatible issue
+        if (method.equals("POST") && (userAgent.contains("MSIE 9.0") ||userAgent.contains("MSIE 8.0"))
+                && url.endsWith("files")){
             return;
         }
 
@@ -75,8 +84,7 @@ public class CsrfProtectionFilter implements ContainerRequestFilter {
             LOGGER.debug("System Log: user refused to login because of no CSRF header");
 
             Response.ResponseBuilder badRequestBuilder = Response.status(400);
-            response.getHeaderNames().stream()
-                    .forEach(headerName -> badRequestBuilder.header(headerName, response.getHeader(headerName)));
+            response.getHeaderNames().stream().forEach(headerName -> badRequestBuilder.header(headerName, response.getHeader(headerName)));
 
             badRequestBuilder.header("SET-COOKIE", buildCookieHeader(generateCsrfCookie(CSRF_COOKIE_NAME))).build();
             requestContext.abortWith(badRequestBuilder.entity(csrfBadRequestInfo()).build());
