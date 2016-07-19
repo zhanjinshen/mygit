@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+@Ignore("because of oss authority control")
 public class FileTransferTest {
 
     private Transfer transfer;
