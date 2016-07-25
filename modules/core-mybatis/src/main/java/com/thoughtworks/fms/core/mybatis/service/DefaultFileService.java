@@ -72,7 +72,7 @@ public class DefaultFileService implements FileService {
     }
 
     private void ensureAcceptedSuffix(String suffix) {
-        if (!ACCEPT_EXTENSIONS.contains(suffix)) {
+        if (!ACCEPT_EXTENSIONS.contains(suffix.toLowerCase())) {
             throw new InvalidRequestException(FMSErrorCode.FILE_EXTENSION_NOT_ACCEPT);
         }
     }
