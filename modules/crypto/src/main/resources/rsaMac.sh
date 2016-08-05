@@ -15,7 +15,6 @@ usage() {
 }
 
 setRSAKeyEnv() {
-    shift 1
     while :
     do
         case "$1" in
@@ -46,7 +45,6 @@ generateRSAKey() {
 }
 
 setKeyStoreEnv(){
-    shift 1
     while :
     do
         case "$1" in
@@ -92,16 +90,16 @@ generateKeyStore() {
     echo `java -cp "$SHELL_PATH/crypto-standalone.jar" com.thoughtworks.fms.crypto.KeyStoreGenerator`
 }
 
-TEMP=`getopt -al privateKeyPath:,publicKeyPath:,rsaKeyGenerator -- "$@"`
-eval set -- "${TEMP}"
+TEMP=`getopt -al privateKeyPath:,publicKeyPath:,password:,keyName:,filePath:,rsaKeyGenerator -- "$@"`
 
-shift 3
 case "$1" in
     rsaKeyGenerator)
+        eval set -- "${TEMP}"
         setRSAKeyEnv "$@"
         generateRSAKey
         ;;
     keyStoreGenerator)
+        eval set -- "${TEMP}"
         setKeyStoreEnv "$@"
         generateKeyStore
         ;;
