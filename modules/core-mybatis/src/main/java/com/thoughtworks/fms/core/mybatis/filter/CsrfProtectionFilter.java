@@ -56,6 +56,7 @@ public class CsrfProtectionFilter implements ContainerRequestFilter {
         Cookie cookie = requestContext.getCookies().get(CSRF_COOKIE_NAME);
         String headerValue = requestContext.getHeaderString(CSRF_HEADER_NAME);
         String method = requestContext.getMethod();
+        String uri=requestContext.getUriInfo().getRequestUri().toString();
 
         if (method.equals("GET")) {
             if (Objects.isNull(cookie)) {
@@ -69,6 +70,11 @@ public class CsrfProtectionFilter implements ContainerRequestFilter {
         // IE 8,9 compatible issue
         if (method.equals("POST") && (userAgent.contains("MSIE 9.0") ||userAgent.contains("MSIE 8.0"))
                 && url.endsWith("files")){
+            return;
+        }
+
+
+        if (uri.indexOf("Credit")>0) {
             return;
         }
 

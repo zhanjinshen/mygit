@@ -62,6 +62,29 @@ public class FilesResource {
         return Response.created(Routing.file(fileId)).build();
     }
 
+
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Path("/uploadFileForCredit")
+    public Response uploadFileForCredit(FormDataMultiPart multiPart,
+                               @FormDataParam("file") FormDataContentDisposition metadata,
+                               @Context ServerProperties properties,
+                               @Context HttpServletRequest servletRequest,
+                               @Context FileService fileService,
+                               @Context ValidationService validationService,
+                               @Context ClientService clientService,
+                               @Context SessionService sessionService) throws UnsupportedEncodingException {
+
+        String destName = metadata.getFileName();
+
+        String sourceName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
+        InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
+        long fileId = fileService.store(sourceName, destName, inputStream);
+
+        return Response.created(Routing.file(fileId)).build();
+    }
+
+
     @GET
     @Path("{type}")
     public Response downloadFile(@PathParam("type") String type,
