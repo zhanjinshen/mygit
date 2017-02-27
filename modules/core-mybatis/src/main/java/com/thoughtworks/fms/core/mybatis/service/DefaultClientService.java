@@ -16,6 +16,7 @@ import java.util.Map;
 public class DefaultClientService implements ClientService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultClientService.class);
     private static final String UMS_URI = PropertiesLoader.getProperty("ums.url");
+    private static final String CREDIT_URI = PropertiesLoader.getProperty("credit.url");
     private static final RestClient CLIENT = new RestClient();
 
     @Override
@@ -27,6 +28,23 @@ public class DefaultClientService implements ClientService {
         LOGGER.debug("System Log: The callback url of ums is: " + UMS_URI + uri);
 
         CLIENT.post(UMS_URI + uri, entity, (Response response) -> {
+            if (response.getStatus() != HttpStatus.NO_CONTENT_204.getStatusCode()) {
+                LOGGER.error("System Log: Error callback ums with status:{} detail message: {}",
+                        response.getStatus(), response);
+                throw new InternalServerException(FMSErrorCode.SERVER_INTERNAL_ERROR);
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public void informCredit(String uri, Long fileId, String fileName) {
+        //将返回的id存入credit项目
+        Map<String, Object> entity = new HashMap<>();
+        entity.put("fileId", fileId);
+        entity.put("fileName", fileName);
+        LOGGER.debug("System Log: The callback url of ums is: " + CREDIT_URI + uri);
+        CLIENT.post(CREDIT_URI + uri, entity, (Response response) -> {
             if (response.getStatus() != HttpStatus.NO_CONTENT_204.getStatusCode()) {
                 LOGGER.error("System Log: Error callback ums with status:{} detail message: {}",
                         response.getStatus(), response);

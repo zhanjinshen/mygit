@@ -80,7 +80,8 @@ public class FilesResource {
         String sourceName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
         InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
         long fileId = fileService.store(sourceName, destName, inputStream);
-
+        String uri ="";
+        clientService.informUms(uri, fileId, sourceName);
         return Response.created(Routing.file(fileId)).build();
     }
 
@@ -105,6 +106,8 @@ public class FilesResource {
         String userAgent = servletRequest.getHeader("User-Agent");
         return getResponse(fileService, fileIds, fileName, userAgent);
     }
+
+
 
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
