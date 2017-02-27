@@ -37,6 +37,12 @@ public class DefaultClientService implements ClientService {
         });
     }
 
+    /**
+     * 将上传好的id返回给credit
+     * @param uri
+     * @param fileId
+     * @param fileName
+     */
     @Override
     public void informCredit(String uri, Long fileId, String fileName) {
         //将返回的id存入credit项目
