@@ -81,7 +81,7 @@ public class FilesResource {
         InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
         long fileId = fileService.store(sourceName, destName, inputStream);
         //credit持久化路径
-        String uri ="";
+        String uri ="/creditAttachment/saveCreditAttachmentByFileId";
         clientService.informCredit(uri, fileId, sourceName);
         return Response.created(Routing.file(fileId)).build();
     }

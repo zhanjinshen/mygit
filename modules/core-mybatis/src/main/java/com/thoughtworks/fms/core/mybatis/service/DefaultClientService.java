@@ -49,13 +49,13 @@ public class DefaultClientService implements ClientService {
         Map<String, Object> entity = new HashMap<>();
         entity.put("fileId", fileId);
         entity.put("fileName", fileName);
-        LOGGER.debug("System Log: The callback url of ums is: " + CREDIT_URI + uri);
-        CLIENT.post(CREDIT_URI + uri, entity, (Response response) -> {
-            if (response.getStatus() != HttpStatus.NO_CONTENT_204.getStatusCode()) {
-                LOGGER.error("System Log: Error callback ums with status:{} detail message: {}",
-                        response.getStatus(), response);
-                throw new InternalServerException(FMSErrorCode.SERVER_INTERNAL_ERROR);
-            }
+        LOGGER.debug("System Log: The callback url of credit is: " + CREDIT_URI + uri);
+        CLIENT.postForCredit(CREDIT_URI + uri, entity, (Response response) -> {
+//            if (response.getStatus() != HttpStatus.NO_CONTENT_204.getStatusCode()) {
+//                LOGGER.error("System Log: Error callback credit with status:{} detail message: {}",
+//                        response.getStatus(), response);
+//                throw new InternalServerException(FMSErrorCode.SERVER_INTERNAL_ERROR);
+//            }
             return null;
         });
     }
