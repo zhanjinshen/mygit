@@ -81,10 +81,23 @@ public class FilesResource {
         InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
         long fileId = fileService.store(sourceName, destName, inputStream);
         String url= fileService.getUrl(destName);
-        //credit鎸佷箙鍖栬矾寰�
+        //credit固定路径
         String uri ="/creditAttachment/saveCreditAttachmentByFileId";
         clientService.informCredit(uri, fileId, sourceName, destName);
         return fileId;
+    }
+
+    @GET
+    @Path("/downloadFileForCredit")
+    public Response downloadFileForCredit(@Context ServerProperties properties,
+                                 @Context HttpServletRequest servletRequest,
+                                 @Context FileService fileService,
+                                 @Context ValidationService validationService,
+                                 @Context SessionService sessionService) throws UnsupportedEncodingException {
+        String fileIds = sessionService.getAttribute(servletRequest,"fileIds".toString()).toString();
+        String fileName = sessionService.getAttribute(servletRequest,"fileName".toString()).toString();
+        String userAgent = servletRequest.getHeader("User-Agent");
+        return getResponse(fileService, fileIds, fileName, userAgent);
     }
 
 
