@@ -44,11 +44,13 @@ public class DefaultClientService implements ClientService {
      * @param fileName
      */
     @Override
-    public void informCredit(String uri, Long fileId, String fileName) {
+    public void informCredit(String uri, Long fileId, String fileName, String destName) {
         //将返回的id存入credit项目
         Map<String, Object> entity = new HashMap<>();
         entity.put("fileId", fileId);
         entity.put("fileName", fileName);
+        entity.put("url", destName);
+        entity.put("name", fileName.split("\\.")[0]);
         LOGGER.debug("System Log: The callback url of credit is: " + CREDIT_URI + uri);
         CLIENT.postForCredit(CREDIT_URI + uri, entity, (Response response) -> {
 //            if (response.getStatus() != HttpStatus.NO_CONTENT_204.getStatusCode()) {

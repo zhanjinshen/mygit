@@ -11,5 +11,7 @@ public interface FileService {
     InputStream fetch(String destName);
 
     File fetch(List<Long> fileIds, String zipFileName);
+    
+    String getUrl(String key);
 
 }

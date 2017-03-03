@@ -1,5 +1,7 @@
 package com.thoughtworks.fms.core.mybatis.service;
 
+import com.aliyun.oss.ClientConfiguration;
+import com.aliyun.oss.OSSClient;
 import com.google.common.base.Splitter;
 import com.thoughtworks.fms.api.service.FileService;
 import com.thoughtworks.fms.core.Cipher;
@@ -17,7 +19,10 @@ import com.thoughtworks.fms.exception.EncryptionException;
 import com.thoughtworks.fms.exception.TransferException;
 
 import javax.inject.Inject;
+
 import java.io.*;
+import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -31,6 +36,23 @@ public class DefaultFileService implements FileService {
     private static final int EOF = -1;
     private static List<String> ACCEPT_EXTENSIONS = Splitter.on(",")
             .splitToList(PropertiesLoader.getProperty("file.accept.extensions"));
+    
+   
+    private static String END_POINT = PropertiesLoader.getProperty("oss.end.point");
+    private static String BUCKET_NAME = PropertiesLoader.getProperty("oss.bucket.name");
+    private static String ACCESS_KEY_ID = PropertiesLoader.getProperty("oss.access.key.id");
+    private static String ACCESS_KEY_SECRET = PropertiesLoader.getProperty("oss.access.key.secret");
+
+    private static OSSClient client;
+
+    static {
+        ClientConfiguration conf = new ClientConfiguration();
+        conf.setConnectionTimeout(20 * 1000);
+        conf.setSocketTimeout(20 * 1000);
+
+        client = new OSSClient(END_POINT, ACCESS_KEY_ID, ACCESS_KEY_SECRET, conf);
+    }
+
     @Inject
     private FileRepository repository;
 
@@ -39,10 +61,12 @@ public class DefaultFileService implements FileService {
 
     @Inject
     private Transfer transfer;
+//    @Inject
+//    private OSSClient ossClient;
 
     @Override
     public long store(String sourceName, String destName, InputStream inputStream) {
-        destName = DateTimeHelper.appendDateTimeStr(destName, "-" + UUID.randomUUID().toString().substring(0, 9));
+//        destName = DateTimeHelper.appendDateTimeStr(destName, "-" + UUID.randomUUID().toString().substring(0, 9));
         String suffix = getAcceptedSuffix(sourceName);
         long count;
 
@@ -185,5 +209,23 @@ public class DefaultFileService implements FileService {
             return this.count;
         }
     }
+
+    /**
+     * ���url����
+     *
+     * @param key
+     * @return
+     */
+    public String getUrl(String key) {
+      // ����URL����ʱ��Ϊ10��  3600l* 1000*24*365*10
+      Date expiration = new Date(new Date().getTime() + 3600l * 1000 * 24 * 365 * 10);
+      // ����URL
+      URL url = client.generatePresignedUrl(BUCKET_NAME, key, expiration);
+      if (url != null) {
+        return url.toString();
+      }
+      return null;
+    }
+  
 
 }
