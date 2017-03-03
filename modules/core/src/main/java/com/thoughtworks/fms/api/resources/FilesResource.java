@@ -94,10 +94,12 @@ public class FilesResource {
                                  @Context FileService fileService,
                                  @Context ValidationService validationService,
                                  @Context SessionService sessionService) throws UnsupportedEncodingException {
-        String fileIds = sessionService.getAttribute(servletRequest,"fileIds".toString()).toString();
-        String fileName = sessionService.getAttribute(servletRequest,"fileName".toString()).toString();
+    	Object fileIds =servletRequest.getParameter("fileIds");
+    	Object fileName =servletRequest.getParameter("fileName");
+//        String fileIds = sessionService.getAttribute(servletRequest,"fileIds".toString()).toString();
+//        String fileName = sessionService.getAttribute(servletRequest,"fileName".toString()).toString();
         String userAgent = servletRequest.getHeader("User-Agent");
-        return getResponse(fileService, fileIds, fileName, userAgent);
+        return getResponse(fileService, fileIds.toString(), fileName.toString(), userAgent);
     }
 
 
