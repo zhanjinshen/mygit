@@ -91,7 +91,7 @@ public class DefaultFileService implements FileService {
         String suffix = getAcceptedSuffix(sourceName);
         String newName= destName.replaceAll("."+suffix,"");
         StringBuilder sb = new StringBuilder();
-        String creditUserName=sb.append("CreditUser").append("_").append(userId).append("/").toString();
+        String creditUserName=sb.append("Credit").append("_").append(userId).append("/").toString();
         destName = DateTimeHelper.appendDateTimeStr(newName, "-" + UUID.randomUUID().toString().substring(0, 9));
         String finalName=creditUserName+destName;
         long count;
