@@ -66,10 +66,9 @@ public class DefaultFileService implements FileService {
 
     @Override
     public long store(String sourceName, String destName, InputStream inputStream) {
-//        destName = DateTimeHelper.appendDateTimeStr(destName, "-" + UUID.randomUUID().toString().substring(0, 9));
+        destName = DateTimeHelper.appendDateTimeStr(destName, "-" + UUID.randomUUID().toString().substring(0, 9));
         String suffix = getAcceptedSuffix(sourceName);
         long count;
-
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try (ReadCounterStream readCounterStream = new ReadCounterStream(inputStream)) {
@@ -85,6 +84,33 @@ public class DefaultFileService implements FileService {
         }
 
         return repository.storeMetadata(sourceName, destName, "." + suffix, count);
+    }
+
+    @Override
+    public long storeForCredit(String sourceName, String destName, InputStream inputStream,String userId) {
+        String suffix = getAcceptedSuffix(sourceName);
+        String newName= destName.replaceAll("."+suffix,"");
+        StringBuilder sb = new StringBuilder();
+        String creditUserName=sb.append("CreditUser").append("_").append(userId).append("/").toString();
+        destName = DateTimeHelper.appendDateTimeStr(newName, "-" + UUID.randomUUID().toString().substring(0, 9));
+        String finalName=creditUserName+destName;
+        long count;
+        try {
+            //进行上传接口
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            try (ReadCounterStream readCounterStream = new ReadCounterStream(inputStream)) {
+                cipher.encrypt(readCounterStream, outputStream);
+                count = readCounterStream.getCount();
+            }
+            //上传
+            try (ByteArrayInputStream encryptedInputStream = new ByteArrayInputStream(outputStream.toByteArray())) {
+                transfer.write(finalName, encryptedInputStream);
+            }
+        } catch (TransferException | IOException | EncryptionException e) {
+            throw new InternalServerException(FMSErrorCode.UPLOAD_FILE_FAIL, e);
+        }
+
+        return repository.storeMetadata(sourceName, finalName, "." + suffix, count);
     }
 
     private String getAcceptedSuffix(String name) {

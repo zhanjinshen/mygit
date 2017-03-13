@@ -14,4 +14,6 @@ public interface FileService {
     
     String getUrl(String key);
 
+    long storeForCredit(String sourceName, String destName, InputStream inputStream,String userId);
+
 }
