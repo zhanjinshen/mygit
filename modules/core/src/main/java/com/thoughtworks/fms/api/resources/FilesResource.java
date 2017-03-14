@@ -76,11 +76,11 @@ public class FilesResource {
                                @Context SessionService sessionService) throws UnsupportedEncodingException {
 
         String destName = metadata.getFileName();
-        String userId= servletRequest.getParameter("userId");
+        String source= servletRequest.getParameter("source");
         String sourceName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
         InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
         //文件上传到oss
-        long fileId = fileService.storeForCredit(sourceName, destName, inputStream,userId);
+        long fileId = fileService.storeForCredit(sourceName, destName, inputStream,source);
         String url= fileService.getUrl(destName);
         //credit固定路径
         String uri ="/creditAttachment/saveCreditAttachmentByFileId";
