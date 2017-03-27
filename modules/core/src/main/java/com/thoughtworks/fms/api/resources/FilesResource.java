@@ -75,7 +75,7 @@ public class FilesResource {
                                @Context ClientService clientService,
                                @Context SessionService sessionService) throws UnsupportedEncodingException {
 
-        String destName = metadata.getFileName();
+        String destName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
         String source= servletRequest.getParameter("source");
         String sourceName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
         InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
