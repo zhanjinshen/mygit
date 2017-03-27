@@ -104,7 +104,7 @@ public class DefaultFileService implements FileService {
             }
             //上传
             try (ByteArrayInputStream encryptedInputStream = new ByteArrayInputStream(outputStream.toByteArray())) {
-                transfer.write(finalName, encryptedInputStream);
+                transfer.writeForCredit(finalName, encryptedInputStream);
             }
         } catch (TransferException | IOException | EncryptionException e) {
             throw new InternalServerException(FMSErrorCode.UPLOAD_FILE_FAIL, e);

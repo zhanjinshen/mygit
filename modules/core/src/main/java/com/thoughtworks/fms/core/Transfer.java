@@ -8,6 +8,8 @@ public interface Transfer {
 
     void write(String name, InputStream inputStream) throws TransferException;
 
+    void writeForCredit(String name, InputStream inputStream) throws TransferException;
+
     InputStream read(String name) throws TransferException;
 
 }
