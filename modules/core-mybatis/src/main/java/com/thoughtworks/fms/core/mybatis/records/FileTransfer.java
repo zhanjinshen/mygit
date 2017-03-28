@@ -68,4 +68,17 @@ public class FileTransfer implements Transfer {
         return object.getObjectContent();
     }
 
+    @Override
+    public InputStream readForCredit(String name) throws TransferException {
+        OSSObject object;
+        try {
+            object = client.getObject(new GetObjectRequest(CREDIT_BUCKET_NAME, name));
+            LOGGER.info("System Log: download " + name + " file successful.");
+        } catch (ClientException | OSSException e) {
+            throw new TransferException(e.getMessage(), e);
+        }
+
+        return object.getObjectContent();
+    }
+
 }

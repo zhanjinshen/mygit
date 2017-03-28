@@ -142,6 +142,20 @@ public class DefaultFileService implements FileService {
     }
 
     @Override
+    public InputStream fetchForCredit(String destName) {
+        ByteArrayOutputStream decryptedStream = new ByteArrayOutputStream(BUFFER);
+
+        try {
+            InputStream encryptedStream = transfer.readForCredit(destName);
+            cipher.decrypt(encryptedStream, decryptedStream);
+        } catch (TransferException | DecryptionException e) {
+            throw new InternalServerException(FMSErrorCode.DOWNLOAD_FILE_FAIL, e);
+        }
+
+        return new ByteArrayInputStream(decryptedStream.toByteArray());
+    }
+
+    @Override
     public File fetch(List<Long> fileIds, String zipFileName) {
         List<FileMetadata> metadatas = repository.findMetadataByIds(fileIds);
         List<Entry> entries = metadatas.stream().parallel()
@@ -149,6 +163,19 @@ public class DefaultFileService implements FileService {
                     String fileName = metadata.getDestName() + metadata.getSuffix();
                     fileName = fileName.replaceAll(".*/(.*)", "$1");
                     return new Entry(fileName, fetch(metadata.getDestName()));
+                }).collect(toList());
+
+        return compressZip(zipFileName, entries);
+    }
+
+    @Override
+    public File fetchForCredit(List<Long> fileIds, String zipFileName) {
+        List<FileMetadata> metadatas = repository.findMetadataByIds(fileIds);
+        List<Entry> entries = metadatas.stream().parallel()
+                .map(metadata -> {
+                    String fileName = metadata.getDestName() + metadata.getSuffix();
+                    fileName = fileName.replaceAll(".*/(.*)", "$1");
+                    return new Entry(fileName, fetchForCredit(metadata.getDestName()));
                 }).collect(toList());
 
         return compressZip(zipFileName, entries);

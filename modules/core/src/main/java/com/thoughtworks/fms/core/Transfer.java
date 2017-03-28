@@ -12,4 +12,6 @@ public interface Transfer {
 
     InputStream read(String name) throws TransferException;
 
+    InputStream readForCredit(String name) throws TransferException;
+
 }

@@ -81,7 +81,7 @@ public class FilesResource {
         InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
         //文件上传到oss
         long fileId = fileService.storeForCredit(sourceName, destName, inputStream,source);
-        String url= fileService.getUrl(destName);
+//        String url= fileService.getUrl(destName);
         //credit固定路径
         String uri ="/creditAttachment/saveCreditAttachmentByFileId";
         clientService.informCredit(uri, fileId, sourceName, destName);
@@ -100,7 +100,7 @@ public class FilesResource {
 //        String fileIds = sessionService.getAttribute(servletRequest,"fileIds".toString()).toString();
 //        String fileName = sessionService.getAttribute(servletRequest,"fileName".toString()).toString();
         String userAgent = servletRequest.getHeader("User-Agent");
-        return getResponse(fileService, fileIds.toString(), fileName.toString(), userAgent);
+        return getResponseForCredit(fileService, fileIds.toString(), fileName.toString(), userAgent);
     }
 
 
@@ -144,6 +144,25 @@ public class FilesResource {
                 .stream().map(Long::valueOf).collect(toList());
 
         final File zipFile = fileService.fetch(fileIdsList, fileName);
+        StreamingOutput streamingOutput = output -> {
+            try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(zipFile))) {
+                IOUtils.copy(inputStream, output);
+            } finally {
+                zipFile.delete();
+            }
+        };
+
+        return Response
+                .ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
+                .header("content-disposition", getContentDispositionFileName(userAgent, zipFile.getName()))
+                .build();
+    }
+
+    private Response getResponseForCredit(FileService fileService, String fileIds, String fileName, String userAgent) throws UnsupportedEncodingException {
+        List<Long> fileIdsList = Splitter.on(",").splitToList(fileIds)
+                .stream().map(Long::valueOf).collect(toList());
+
+        final File zipFile = fileService.fetchForCredit(fileIdsList, fileName);
         StreamingOutput streamingOutput = output -> {
             try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(zipFile))) {
                 IOUtils.copy(inputStream, output);

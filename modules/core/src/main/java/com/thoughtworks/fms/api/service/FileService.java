@@ -16,4 +16,8 @@ public interface FileService {
 
     long storeForCredit(String sourceName, String destName, InputStream inputStream,String source);
 
+    File fetchForCredit(List<Long> fileIds, String zipFileName);
+
+    InputStream fetchForCredit(String destName);
+
 }
