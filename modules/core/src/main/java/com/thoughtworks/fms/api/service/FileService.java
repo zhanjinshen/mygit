@@ -11,5 +11,13 @@ public interface FileService {
     InputStream fetch(String destName);
 
     File fetch(List<Long> fileIds, String zipFileName);
+    
+    String getUrl(String key);
+
+    long storeForCredit(String sourceName, String destName, InputStream inputStream,String source);
+
+    File fetchForCredit(List<Long> fileIds, String zipFileName);
+
+    InputStream fetchForCredit(String destName);
 
 }

@@ -16,6 +16,7 @@ import java.util.Map;
 public class DefaultClientService implements ClientService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultClientService.class);
     private static final String UMS_URI = PropertiesLoader.getProperty("ums.url");
+    private static final String CREDIT_URI = PropertiesLoader.getProperty("credit.url");
     private static final RestClient CLIENT = new RestClient();
 
     @Override
@@ -32,6 +33,31 @@ public class DefaultClientService implements ClientService {
                         response.getStatus(), response);
                 throw new InternalServerException(FMSErrorCode.SERVER_INTERNAL_ERROR);
             }
+            return null;
+        });
+    }
+
+    /**
+     * 将上传好的id返回给credit
+     * @param uri
+     * @param fileId
+     * @param fileName
+     */
+    @Override
+    public void informCredit(String uri, Long fileId, String fileName, String destName) {
+        //将返回的id存入credit项目
+        Map<String, Object> entity = new HashMap<>();
+        entity.put("fileId", fileId);
+        entity.put("fileName", fileName);
+        entity.put("url", destName);
+        entity.put("name", fileName.split("\\.")[0]);
+        LOGGER.debug("System Log: The callback url of credit is: " + CREDIT_URI + uri);
+        CLIENT.postForCredit(CREDIT_URI + uri, entity, (Response response) -> {
+//            if (response.getStatus() != HttpStatus.NO_CONTENT_204.getStatusCode()) {
+//                LOGGER.error("System Log: Error callback credit with status:{} detail message: {}",
+//                        response.getStatus(), response);
+//                throw new InternalServerException(FMSErrorCode.SERVER_INTERNAL_ERROR);
+//            }
             return null;
         });
     }

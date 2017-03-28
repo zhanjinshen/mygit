@@ -62,6 +62,48 @@ public class FilesResource {
         return Response.created(Routing.file(fileId)).build();
     }
 
+
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Path("/uploadFileForCredit")
+    public long uploadFileForCredit(FormDataMultiPart multiPart,
+                               @FormDataParam("file") FormDataContentDisposition metadata,
+                               @Context ServerProperties properties,
+                               @Context HttpServletRequest servletRequest,
+                               @Context FileService fileService,
+                               @Context ValidationService validationService,
+                               @Context ClientService clientService,
+                               @Context SessionService sessionService) throws UnsupportedEncodingException {
+
+        String destName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
+        String source= servletRequest.getParameter("source");
+        String sourceName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
+        InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
+        //文件上传到oss
+        long fileId = fileService.storeForCredit(sourceName, destName, inputStream,source);
+//        String url= fileService.getUrl(destName);
+        //credit固定路径
+        String uri ="/creditAttachment/saveCreditAttachmentByFileId";
+        clientService.informCredit(uri, fileId, sourceName, destName);
+        return fileId;
+    }
+
+    @GET
+    @Path("/downloadFileForCredit")
+    public Response downloadFileForCredit(@Context ServerProperties properties,
+                                 @Context HttpServletRequest servletRequest,
+                                 @Context FileService fileService,
+                                 @Context ValidationService validationService,
+                                 @Context SessionService sessionService) throws UnsupportedEncodingException {
+    	Object fileIds =servletRequest.getParameter("fileIds");
+    	Object fileName =servletRequest.getParameter("fileName");
+//        String fileIds = sessionService.getAttribute(servletRequest,"fileIds".toString()).toString();
+//        String fileName = sessionService.getAttribute(servletRequest,"fileName".toString()).toString();
+        String userAgent = servletRequest.getHeader("User-Agent");
+        return getResponseForCredit(fileService, fileIds.toString(), fileName.toString(), userAgent);
+    }
+
+
     @GET
     @Path("{type}")
     public Response downloadFile(@PathParam("type") String type,
@@ -83,6 +125,8 @@ public class FilesResource {
         return getResponse(fileService, fileIds, fileName, userAgent);
     }
 
+
+
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @SystemAuthentication(system = "midas")
@@ -100,6 +144,25 @@ public class FilesResource {
                 .stream().map(Long::valueOf).collect(toList());
 
         final File zipFile = fileService.fetch(fileIdsList, fileName);
+        StreamingOutput streamingOutput = output -> {
+            try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(zipFile))) {
+                IOUtils.copy(inputStream, output);
+            } finally {
+                zipFile.delete();
+            }
+        };
+
+        return Response
+                .ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
+                .header("content-disposition", getContentDispositionFileName(userAgent, zipFile.getName()))
+                .build();
+    }
+
+    private Response getResponseForCredit(FileService fileService, String fileIds, String fileName, String userAgent) throws UnsupportedEncodingException {
+        List<Long> fileIdsList = Splitter.on(",").splitToList(fileIds)
+                .stream().map(Long::valueOf).collect(toList());
+
+        final File zipFile = fileService.fetchForCredit(fileIdsList, fileName);
         StreamingOutput streamingOutput = output -> {
             try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(zipFile))) {
                 IOUtils.copy(inputStream, output);

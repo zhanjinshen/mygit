@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -34,6 +35,26 @@ public class RestClient {
                     .header("MIDAS-TIMESTAMP", timestamp)
                     .header("MIDAS-SYSTEM", "fms")
                     .header("MIDAS-MD5", getMd5(entity, timestamp))
+                    .post(Entity.json(entity));
+            return handler.apply(response);
+        } finally {
+            closeConnection(response);
+            closeClient(client);
+        }
+    }
+
+    public <T> T postForCredit(String url, Map entity, Function<Response, T> handler) {
+        Client client = ClientBuilder.newClient();
+        Response response = null;
+        try {
+            long timestamp = new Date().getTime();
+            response = client.target(url)
+                    .request()
+                    .header("MIDAS-TIMESTAMP", timestamp)
+                    .header("MIDAS-SYSTEM", "fms")
+                    .header("MIDAS-MD5", getMd5(entity, timestamp))
+                    .header("filedId", entity.get("fileId"))
+                    .header("filedName", entity.get("fileName"))
                     .post(Entity.json(entity));
             return handler.apply(response);
         } finally {
