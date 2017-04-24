@@ -1,6 +1,14 @@
 package com.thoughtworks.fms.api.resources;
 
+import com.artofsolving.jodconverter.BasicDocumentFormatRegistry;
+import com.artofsolving.jodconverter.DocumentConverter;
+import com.artofsolving.jodconverter.DocumentFormat;
+import com.artofsolving.jodconverter.DocumentFormatRegistry;
+import com.artofsolving.jodconverter.openoffice.connection.OpenOfficeConnection;
+import com.artofsolving.jodconverter.openoffice.connection.SocketOpenOfficeConnection;
+import com.artofsolving.jodconverter.openoffice.converter.OpenOfficeDocumentConverter;
 import com.google.common.base.Splitter;
+import com.sun.star.io.ConnectException;
 import com.thoughtworks.fms.api.Json;
 import com.thoughtworks.fms.api.filter.SystemAuthentication;
 import com.thoughtworks.fms.api.service.ClientService;
@@ -29,6 +37,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
+import static jdk.nashorn.internal.runtime.regexp.joni.Config.log;
 
 @Path("files")
 public class FilesResource {
@@ -75,6 +84,10 @@ public class FilesResource {
                                @Context ClientService clientService,
                                @Context SessionService sessionService) throws UnsupportedEncodingException {
 
+
+
+
+
         String destName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
         String source= servletRequest.getParameter("source");
         String sourceName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
@@ -85,6 +98,56 @@ public class FilesResource {
         //credit固定路径
         String uri ="/creditAttachment/saveCreditAttachmentByFileId";
         clientService.informCredit(uri, fileId, sourceName, destName);
+
+
+        String fi ="E:\\testin\\111.doc";
+        String fo ="E:\\testout\\testaa.pdf";
+        File inputFile = new File(fi);
+        File outputFile = new File(fo);
+        String OpenOffice_HOME = "C:\\Program Files (x86)\\OpenOffice 4";// 这里是OpenOffice的安装目录,
+        // 在我的项目中,为了便于拓展接口,没有直接写成这个样子,但是这样是尽对没题目的
+        // 假如从文件中读取的URL地址最后一个字符不是 '\'，则添加'\'
+        if (OpenOffice_HOME.charAt(OpenOffice_HOME.length() - 1) != '/') {
+            OpenOffice_HOME += "/";
+        }
+        Process pro = null;
+        try {
+            // 启动OpenOffice的服务
+            String command = OpenOffice_HOME
+                    + "program/soffice.exe -headless -accept=\"socket,host=127.0.0.1,port=8100;urp;\"";
+            pro = Runtime.getRuntime().exec(command);
+            // connect to an OpenOffice.org instance running on port 8100
+            OpenOfficeConnection connection = new SocketOpenOfficeConnection("127.0.0.1", 8100);
+            connection.connect();
+
+            // convert
+            DocumentConverter converter = new OpenOfficeDocumentConverter(connection);
+            converter.convert(inputFile,outputFile);
+
+            // close the connection
+            connection.disconnect();
+            // 封闭OpenOffice服务的进程
+            pro.destroy();
+
+            return 0;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return -1;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            pro.destroy();
+        }
+
+//        return 1;
+
+
+
+
+
+
+
+
         return fileId;
     }
 
@@ -186,5 +249,84 @@ public class FilesResource {
         }
 
     }
+
+//    public void convert(File sourceFile, File targetFile) {
+//
+//        try {
+//            // 1: 打开连接
+//            OpenOfficeConnection connection = new SocketOpenOfficeConnection(8100);
+//            connection.connect();
+//
+//            DocumentConverter converter = new OpenOfficeDocumentConverter(connection);
+//            // 2:获取Format
+//            DocumentFormatRegistry factory = new BasicDocumentFormatRegistry();
+//            DocumentFormat inputDocumentFormat = factory
+//                    .getFormatByFileExtension(getExtensionName(sourceFile.getAbsolutePath()));
+//            DocumentFormat outputDocumentFormat = factory
+//                    .getFormatByFileExtension(getExtensionName(targetFile.getAbsolutePath()));
+//            // 3:执行转换
+//            converter.convert(sourceFile, inputDocumentFormat, targetFile, outputDocumentFormat);
+//        } catch (ConnectException e) {
+//            LOGGER.info("文档转换PDF失败");
+//        }
+//    }
+
+
+    public void convert(String input, String output){
+        File inputFile = new File(input);
+        File outputFile = new File(output);
+        OpenOfficeConnection connection = new SocketOpenOfficeConnection(8100);
+        try {
+            connection.connect();
+            DocumentConverter converter = new OpenOfficeDocumentConverter(connection);
+            converter.convert(inputFile, outputFile);
+        } catch(Exception e) {
+            e.printStackTrace();
+        } finally {
+            try{ if(connection != null){connection.disconnect(); connection = null;}}catch(Exception e){}
+        }
+    }
+
+//    public static int office2PDF(String sourceFile, String destFile) {
+//
+//        File inputFile = new File(sourceFile);
+//        File outputFile = new File(destFile);
+//        String OpenOffice_HOME = "C:\\Program Files (x86)\\OpenOffice 4\\program";// 这里是OpenOffice的安装目录,
+//        // 在我的项目中,为了便于拓展接口,没有直接写成这个样子,但是这样是尽对没题目的
+//        // 假如从文件中读取的URL地址最后一个字符不是 '\'，则添加'\'
+//        if (OpenOffice_HOME.charAt(OpenOffice_HOME.length() - 1) != '/') {
+//            OpenOffice_HOME += "/";
+//        }
+//        Process pro = null;
+//        try {
+//            // 启动OpenOffice的服务
+//            String command = OpenOffice_HOME
+//                    + "program/soffice.exe -headless -accept=\"socket,host=127.0.0.1,port=8100;urp;\"";
+//            pro = Runtime.getRuntime().exec(command);
+//            // connect to an OpenOffice.org instance running on port 8100
+//            OpenOfficeConnection connection = new SocketOpenOfficeConnection("127.0.0.1", 8100);
+//            connection.connect();
+//
+//            // convert
+//            DocumentConverter converter = new OpenOfficeDocumentConverter(connection);
+//            converter.convert(inputFile, outputFile);
+//
+//            // close the connection
+//            connection.disconnect();
+//            // 封闭OpenOffice服务的进程
+//            pro.destroy();
+//
+//            return 0;
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//            return -1;
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            pro.destroy();
+//        }
+//
+//        return 1;
+//    }
 
 }
