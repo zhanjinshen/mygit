@@ -4,6 +4,9 @@ import com.artofsolving.jodconverter.DocumentConverter;
 import com.artofsolving.jodconverter.openoffice.connection.OpenOfficeConnection;
 import com.artofsolving.jodconverter.openoffice.connection.SocketOpenOfficeConnection;
 import com.artofsolving.jodconverter.openoffice.converter.OpenOfficeDocumentConverter;
+import com.thoughtworks.fms.api.resources.FilesResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.HashMap;
@@ -13,7 +16,7 @@ import java.util.Map;
  * Created by TanYuan on 2017/4/27.
  */
 public class ConvertUtil {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConvertUtil.class);
     private static final String FILE_SERVERS = PropertiesLoader.getProperty("file.servers");
     private static final String SWFTools_SERVERS = PropertiesLoader.getProperty("swftools.servers");
     private static final String OPENOFFICE_RUN_COMMAND = PropertiesLoader.getProperty("openoffice.run.command");
@@ -53,6 +56,7 @@ public class ConvertUtil {
 
     public static Map doc2swf(String fileString) throws Exception{
         Map<String,Object> fileMap =new HashMap<>();
+        LOGGER.info("转换开始，转换文件在文件服务器路径："+fileString);
         String fileName = fileString.substring(0, fileString.lastIndexOf("."));
         File docFile = new File(fileString);
         File pdfFile = new File(fileName + ".pdf");
@@ -63,12 +67,13 @@ public class ConvertUtil {
                     //doc2pdf
                     //run openoffice
                     runOpenOffice();
-                    OpenOfficeConnection connection = new SocketOpenOfficeConnection(  "127.0.0.1", 8100);
+                    OpenOfficeConnection connection = new SocketOpenOfficeConnection( "127.0.0.1", 8100);
                     connection.connect();
                     DocumentConverter converter = new OpenOfficeDocumentConverter(connection);
                     converter.convert(docFile, pdfFile);
                     // close the connection
                     connection.disconnect();
+                    LOGGER.info("使用openOffice将文件转成pdf成功" + pdfFile.getPath()+ "****");
                     System.out.println("使用openOffice将文件转成pdf成功" + pdfFile.getPath()+ "****");
 
                     //pdf2swf
@@ -94,10 +99,10 @@ public class ConvertUtil {
                     throw e;
                 }
             } else {
-                System.out.println("****�Ѿ�ת��Ϊpdf������Ҫ�ٽ���ת��****");
+                LOGGER.info("pdf文件已存在无需转换！");
             }
         } else {
-            System.out.println("****swfת�����쳣����Ҫת�����ĵ������ڣ��޷�ת��****");
+            LOGGER.info("doc文件不存在！");
         }
         return  fileMap;
     }
@@ -125,6 +130,7 @@ public class ConvertUtil {
 //                String OpenOffice_HOME = "D:\\Program Files\\OpenOffice 4.1.3\\program\\";
 //                String OpenOffice_HOME = "C:\\Program Files (x86)\\OpenOffice 4";// 这里是OpenOffice的安装目录,
                 String OpenOffice_HOME =OPENOFFICE_SERVERS ;// 这里是OpenOffice的安装目录,
+                LOGGER.info("获取配置的OpenOffice安装路径:"+OPENOFFICE_SERVERS);
                 // 在我的项目中,为了便于拓展接口,没有直接写成这个样子,但是这样是尽对没题目的
                 // 假如从文件中读取的URL地址最后一个字符不是 '\'，则添加'\'
                 if (OpenOffice_HOME.charAt(OpenOffice_HOME.length() - 1) != '/') {
