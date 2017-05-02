@@ -81,9 +81,13 @@ public class FilesResource {
         String sourceName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
         InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
        String newFilePath= fileService.saveUploadFileForView(inputStream,destName);
+        System.out.println("文件生成路径："+newFilePath);
+        LOGGER.info("文件生成路径=" + newFilePath);
         long fileId;
             try {
                 if(""!=newFilePath){
+                    System.out.println("开始执行转换");
+                    LOGGER.info("开始执行转换");
               Map<String,Object> fileMap=  fileService.doc2swf(newFilePath);
                     if(fileMap.containsKey("docFile")){
                         File docFile=(File)fileMap.get("docFile");
