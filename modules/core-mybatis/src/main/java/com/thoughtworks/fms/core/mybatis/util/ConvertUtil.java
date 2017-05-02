@@ -71,8 +71,20 @@ public class ConvertUtil {
                     //doc2pdf
                     //run openoffice
                     runOpenOffice();
+//                    OpenOfficeConnection connection = new SocketOpenOfficeConnection(8100);
+//                    connection.connect();
+//
+//                    DocumentConverter converter = new OpenOfficeDocumentConverter(connection);
+//                    // 2:获取Format
+//                    DocumentFormatRegistry factory = new BasicDocumentFormatRegistry();
+//                    DocumentFormat inputDocumentFormat = factory
+//                            .getFormatByFileExtension(getExtensionName(sourceFile.getAbsolutePath()));
+//                    DocumentFormat outputDocumentFormat = factory
+//                            .getFormatByFileExtension(getExtensionName(targetFile.getAbsolutePath()));
+//                    // 3:执行转换
+//                    converter.convert(sourceFile, inputDocumentFormat, targetFile, outputDocumentFormat);
                     LOGGER.info("OpenOffice启动成功");
-                    OpenOfficeConnection connection = new SocketOpenOfficeConnection( "127.0.0.1", 8100);
+                    OpenOfficeConnection connection = new SocketOpenOfficeConnection(8100);
                     connection.connect();
                     DocumentConverter converter = new OpenOfficeDocumentConverter(connection);
                     LOGGER.info("*******doc2pdf开始执行文件转换********");
