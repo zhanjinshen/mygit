@@ -28,6 +28,7 @@ public class ConvertUtil {
         try {
             String fileName = sourceFile.getName().substring(0, sourceFile.getName().lastIndexOf("."));
             File swfFile = new File(FILE_SERVERS+fileName + ".swf");
+            LOGGER.info("获取pdf文件路径："+swfFile.getPath());
             File targetFile =swfFile;
             /**
              * SWFTools_HOME在系统中的安装目录
@@ -35,13 +36,16 @@ public class ConvertUtil {
              * 2：linux则xxx/xxx/xxx/pdf2swf即可
              */
             String SWFTools_HOME =SWFTools_SERVERS;
+            LOGGER.info("SWFTools服务路径："+SWFTools_HOME);
             String[] cmd = new String[5];
             cmd[0] = SWFTools_HOME;
             cmd[1] = "-i";
             cmd[2] = sourceFile.getAbsolutePath();
             cmd[3] = "-o";
             cmd[4] = targetFile.getAbsolutePath();
+            LOGGER.info("*******pdf2swf开始执行文件转换********");
             Process pro =Runtime.getRuntime().exec(cmd);
+            LOGGER.info("*******pdf2swf文件转换完成********");
 //           如果不读取流则targetFile.exists() 文件不存在，但是程序没有问题
 //          BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(pro.getInputStream()));
 //          while (bufferedReader.readLine() != null);
@@ -71,9 +75,9 @@ public class ConvertUtil {
                     OpenOfficeConnection connection = new SocketOpenOfficeConnection( "127.0.0.1", 8100);
                     connection.connect();
                     DocumentConverter converter = new OpenOfficeDocumentConverter(connection);
-                    LOGGER.info("*******开始执行文件转换********");
+                    LOGGER.info("*******doc2pdf开始执行文件转换********");
                     converter.convert(docFile, pdfFile);
-                    LOGGER.info("*******文件转换完成********");
+                    LOGGER.info("*******doc2pdf文件转换完成********");
                     // close the connection
                     connection.disconnect();
                     LOGGER.info("使用openOffice将文件转成pdf成功" + pdfFile.getPath()+ "****");
