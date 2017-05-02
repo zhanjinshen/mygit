@@ -104,23 +104,23 @@ public class ConvertUtil {
     public static  void runOpenOffice() throws Exception{
         try {
             //�ж�soffice.exe�Ƿ�����
-            boolean isSofficeRun = false;
-            String testProcessRunCommand =OPENOFFICE_RUN_COMMAND;
-            InputStream is = null;
-            InputStreamReader ir = null;
-            BufferedReader br = null;
-            String line = null;
-            Process pro = Runtime.getRuntime().exec(testProcessRunCommand);
-            is = pro.getInputStream();
-            ir = new InputStreamReader(is);
-            br = new BufferedReader(ir);
-            while ((line = br.readLine()) != null) {
-                if (line.indexOf("soffice.exe") != -1) {
-                    isSofficeRun = true;
-                    break;
-                }
-            }
-            if(!isSofficeRun){
+//            boolean isSofficeRun = false;
+//            String testProcessRunCommand =OPENOFFICE_RUN_COMMAND;
+//            InputStream is = null;
+//            InputStreamReader ir = null;
+//            BufferedReader br = null;
+//            String line = null;
+//            Process pro = Runtime.getRuntime().exec(testProcessRunCommand);
+//            is = pro.getInputStream();
+//            ir = new InputStreamReader(is);
+//            br = new BufferedReader(ir);
+//            while ((line = br.readLine()) != null) {
+//                if (line.indexOf("soffice.exe") != -1) {
+//                    isSofficeRun = true;
+//                    break;
+//                }
+//            }
+//            if(!isSofficeRun){
                 // ����OpenOffice�ķ���
 //                String OpenOffice_HOME = "D:\\Program Files\\OpenOffice 4.1.3\\program\\";
 //                String OpenOffice_HOME = "C:\\Program Files (x86)\\OpenOffice 4";// 这里是OpenOffice的安装目录,
@@ -131,9 +131,9 @@ public class ConvertUtil {
                     OpenOffice_HOME += "/";
                 }
                 String startOpenOfficecommand = OpenOffice_HOME   +START_OPENOFFICE_COMMAND ;
-                pro = Runtime.getRuntime().exec(startOpenOfficecommand);
-            }
-            //pro.destroy();
+                Process pro = Runtime.getRuntime().exec(startOpenOfficecommand);
+//            }
+//                pro.destroy();
         } catch (IOException e) {
             e.printStackTrace();
             throw e;
