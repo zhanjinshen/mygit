@@ -87,12 +87,16 @@ public class FilesResource {
               Map<String,Object> fileMap=  fileService.doc2swf(newFilePath);
                     if(fileMap.containsKey("docFile")){
                         File docFile=(File)fileMap.get("docFile");
-                        docFile.delete();
+                        //docFile.delete();
+                        LOGGER.info("doc文件成功生成=" + docFile);
+                        System.out.println("doc文件成功生成");
                     }
                     if(fileMap.containsKey("pdfFile")){
                         File pdfFile=(File)fileMap.get("pdfFile");
                         fileService.convertForView(pdfFile);
-                        pdfFile.delete();
+                        //pdfFile.delete();
+                        System.out.println("pdf文件成功生成，并且转换成swf文件成功");
+                        LOGGER.info("pdf文件成功生成，并且转换成swf文件成功=" + pdfFile);
                     }
                 }
             } catch (Exception e) {
