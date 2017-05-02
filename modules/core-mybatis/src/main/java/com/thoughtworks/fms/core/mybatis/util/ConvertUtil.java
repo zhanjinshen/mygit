@@ -67,10 +67,13 @@ public class ConvertUtil {
                     //doc2pdf
                     //run openoffice
                     runOpenOffice();
+                    LOGGER.info("OpenOffice启动成功");
                     OpenOfficeConnection connection = new SocketOpenOfficeConnection( "127.0.0.1", 8100);
                     connection.connect();
                     DocumentConverter converter = new OpenOfficeDocumentConverter(connection);
+                    LOGGER.info("*******开始执行文件转换********");
                     converter.convert(docFile, pdfFile);
+                    LOGGER.info("*******文件转换完成********");
                     // close the connection
                     connection.disconnect();
                     LOGGER.info("使用openOffice将文件转成pdf成功" + pdfFile.getPath()+ "****");
@@ -137,6 +140,7 @@ public class ConvertUtil {
                     OpenOffice_HOME += "/";
                 }
                 String startOpenOfficecommand = OpenOffice_HOME   +START_OPENOFFICE_COMMAND ;
+                LOGGER.info("获取OpenOffice启动命令并且启动:"+startOpenOfficecommand);
                 Process pro = Runtime.getRuntime().exec(startOpenOfficecommand);
 //            }
 //                pro.destroy();
