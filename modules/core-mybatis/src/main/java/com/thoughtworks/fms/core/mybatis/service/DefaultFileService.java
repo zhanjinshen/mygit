@@ -11,6 +11,7 @@ import com.thoughtworks.fms.core.Transfer;
 import com.thoughtworks.fms.core.mybatis.exception.FMSErrorCode;
 import com.thoughtworks.fms.core.mybatis.exception.InternalServerException;
 import com.thoughtworks.fms.core.mybatis.exception.InvalidRequestException;
+import com.thoughtworks.fms.core.mybatis.util.ConvertUtil;
 import com.thoughtworks.fms.core.mybatis.util.DateTimeHelper;
 import com.thoughtworks.fms.core.mybatis.util.FileBuilder;
 import com.thoughtworks.fms.core.mybatis.util.PropertiesLoader;
@@ -19,13 +20,11 @@ import com.thoughtworks.fms.exception.EncryptionException;
 import com.thoughtworks.fms.exception.TransferException;
 
 import javax.inject.Inject;
+import javax.servlet.ServletOutputStream;
 
 import java.io.*;
 import java.net.URL;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -156,6 +155,26 @@ public class DefaultFileService implements FileService {
     }
 
     @Override
+    public boolean convertForView(File sourceFile) {
+        return ConvertUtil.convert(sourceFile);
+    }
+
+    @Override
+    public Map doc2swf(String fileString) throws Exception {
+        return ConvertUtil.doc2swf(fileString);
+    }
+
+    @Override
+    public void runOpenOffice() throws Exception {
+        ConvertUtil.runOpenOffice();
+    }
+
+    @Override
+    public String saveUploadFileForView(InputStream inputStreamFile, String destName) {
+        return ConvertUtil.saveUploadFileForView(inputStreamFile,destName);
+    }
+
+    @Override
     public File fetch(List<Long> fileIds, String zipFileName) {
         List<FileMetadata> metadatas = repository.findMetadataByIds(fileIds);
         List<Entry> entries = metadatas.stream().parallel()
@@ -180,14 +199,21 @@ public class DefaultFileService implements FileService {
 
         return compressZip(zipFileName, entries);
     }
-
-    private File compressZip(String zipFileName, List<Entry> entries) {
-        File zipFile = FileBuilder.builder(zipFileName + ".zip").build();
+    private File getFileForView(String zipFileName, List<Entry> entries) {
+        File zipFile = FileBuilder.builder(zipFileName).build();
         try (ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile), BUFFER))) {
             byte data[] = new byte[BUFFER];
-
             for (Entry entry : entries) {
                 try (BufferedInputStream origin = new BufferedInputStream(entry.getInputStream())) {
+                    String resfile = "E:/test/photo4.doc";
+                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(resfile)));
+                    int itemp = 0;
+                    while((itemp = origin.read()) != -1){
+                        bos.write(itemp);
+                    }
+                    System.out.println("文件获取成功"); //console log :文件获取成功
+//                    origin.close();
+                    bos.close();
                     ZipEntry zipEntry = new ZipEntry(entry.getName());
                     out.putNextEntry(zipEntry);
 
@@ -201,6 +227,26 @@ public class DefaultFileService implements FileService {
             throw new InternalServerException(FMSErrorCode.SERVER_INTERNAL_ERROR, e);
         }
 
+        return zipFile;
+    }
+
+    private File compressZip(String zipFileName, List<Entry> entries) {
+       File zipFile = FileBuilder.builder(zipFileName + ".zip").build();
+        try (ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile), BUFFER))) {
+            byte data[] = new byte[BUFFER];
+            for (Entry entry : entries) {
+                try (BufferedInputStream origin = new BufferedInputStream(entry.getInputStream())) {
+                    ZipEntry zipEntry = new ZipEntry(entry.getName());
+                    out.putNextEntry(zipEntry);
+                    int count;
+                    while ((count = origin.read(data)) != EOF) {
+                        out.write(data, 0, count);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new InternalServerException(FMSErrorCode.SERVER_INTERNAL_ERROR, e);
+        }
         return zipFile;
     }
 

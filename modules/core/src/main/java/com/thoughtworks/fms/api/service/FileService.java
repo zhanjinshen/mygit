@@ -3,6 +3,7 @@ package com.thoughtworks.fms.api.service;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 public interface FileService {
 
@@ -20,4 +21,11 @@ public interface FileService {
 
     InputStream fetchForCredit(String destName);
 
+    public  boolean convertForView(File sourceFile);
+
+    public  Map doc2swf(String fileString) throws Exception;
+
+    public   void runOpenOffice() throws Exception;
+
+    public  String saveUploadFileForView(InputStream inputStreamFile,String destName);
 }
