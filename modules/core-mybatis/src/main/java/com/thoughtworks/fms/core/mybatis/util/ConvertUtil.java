@@ -66,10 +66,8 @@ public class ConvertUtil {
         Map<String, Object> fileMap = new HashMap<>();
         LOGGER.info("转换开始，转换文件在文件服务器路径：" + fileString);
         String fileName = fileString.substring(0, fileString.lastIndexOf("."));
-        String prefix = fileString.substring(fileString.lastIndexOf(".") + 1);
         File docFile = new File(fileString);
         File pdfFile = new File(fileName + ".pdf");
-        File swfFile = new File(fileName + ".swf");
         if (docFile.exists()) {
             if (!pdfFile.exists()) {
                 try {
@@ -90,7 +88,10 @@ public class ConvertUtil {
 //                    converter.convert(docFile, inputDocumentFormat, pdfFile, outputDocumentFormat);
                     LOGGER.info("OpenOffice启动成功");
                     OpenOfficeConnection connection = new SocketOpenOfficeConnection(8100);
+                    LOGGER.info("开始监听8100端口");
+                    LOGGER.info("connection开始");
                     connection.connect();
+                    LOGGER.info("connection通道打开");
                     DocumentConverter converter = new OpenOfficeDocumentConverter(connection);
                     LOGGER.info("*******doc2pdf开始执行文件转换********");
                     converter.convert(docFile, pdfFile);
