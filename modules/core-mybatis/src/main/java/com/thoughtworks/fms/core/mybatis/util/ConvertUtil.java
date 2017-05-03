@@ -97,10 +97,9 @@ public class ConvertUtil {
                     converter.convert(docFile, pdfFile);
                     LOGGER.info("*******doc2pdf文件转换完成********");
                     // close the connection
+                    LOGGER.info("connection通道关闭");
                     connection.disconnect();
                     LOGGER.info("使用openOffice将文件转成pdf成功" + pdfFile.getPath() + "****");
-                    System.out.println("使用openOffice将文件转成pdf成功" + pdfFile.getPath() + "****");
-
                     //pdf2swf
 //                    if (!swfFile.exists()) {
 //                        String pdf2swfCommand =  "E:\\SWFTools\\pdf2swf.exe  -i " + pdfFile + " -o "  + swfFile;
@@ -113,11 +112,11 @@ public class ConvertUtil {
                     fileMap.put("docFile", docFile);
                 } catch (java.net.ConnectException e) {
                     e.printStackTrace();
-                    System.err.println("****swfת�����쳣��openoffice����δ������****");
+                    LOGGER.error("使用openOffice将文件转成pdf失败");
                     throw e;
                 } catch (com.artofsolving.jodconverter.openoffice.connection.OpenOfficeException e) {
                     e.printStackTrace();
-                    System.err.println("****swfת�����쳣����ȡת���ļ�ʧ��****");
+                    LOGGER.error("使用openOffice将文件转成pdf失败");
                     throw e;
                 } catch (Exception e) {
                     e.printStackTrace();
