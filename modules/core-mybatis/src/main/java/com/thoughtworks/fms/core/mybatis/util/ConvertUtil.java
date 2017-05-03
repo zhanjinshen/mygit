@@ -25,6 +25,8 @@ public class ConvertUtil {
     private static final String SWFTools_SERVERS_EXECUTE= PropertiesLoader.getProperty("swftools.servers.execute");
     private static final String OPENOFFICE_SERVERS = PropertiesLoader.getProperty("openoffice.servers");
     private static final String START_OPENOFFICE_COMMAND = PropertiesLoader.getProperty("start.OpenOffice.command");
+    private static final String OPENOFFICE_SERVERS_IP = PropertiesLoader.getProperty("openoffice.servers.ip");
+    private static final String OPENOFFICE_SERVERS_PORT = PropertiesLoader.getProperty("openoffice.servers.port");
     public static boolean convert(File sourceFile) {
         try {
             String fileName = sourceFile.getName().substring(0, sourceFile.getName().lastIndexOf("."));
@@ -73,7 +75,10 @@ public class ConvertUtil {
                 try {
                     //doc2pdf
                     //run openoffice
+                    boolean isUse=NetUtil.isPortUsing(OPENOFFICE_SERVERS_IP,Integer.valueOf(OPENOFFICE_SERVERS_PORT));
+                    if(!isUse){
                     runOpenOffice();
+                    }
 //                    OpenOfficeConnection connection = new SocketOpenOfficeConnection(8100);
 //                    connection.connect();
 //
@@ -87,8 +92,8 @@ public class ConvertUtil {
 //                    // 3:执行转换
 //                    converter.convert(docFile, inputDocumentFormat, pdfFile, outputDocumentFormat);
                     LOGGER.info("OpenOffice启动成功");
-                    OpenOfficeConnection connection = new SocketOpenOfficeConnection(8100);
-                    LOGGER.info("开始监听8100端口");
+                    OpenOfficeConnection connection = new SocketOpenOfficeConnection(OPENOFFICE_SERVERS_IP,Integer.valueOf(OPENOFFICE_SERVERS_PORT));
+                    LOGGER.info("开始监听"+OPENOFFICE_SERVERS_PORT+"端口");
                     LOGGER.info("connection开始");
                     connection.connect();
                     LOGGER.info("connection通道打开");
@@ -165,7 +170,7 @@ public class ConvertUtil {
             LOGGER.info("获取OpenOffice启动命令并且启动:" + startOpenOfficecommand);
             Process pro = Runtime.getRuntime().exec(startOpenOfficecommand);
 //            }
-//                pro.destroy();
+ //               pro.destroy();
         } catch (IOException e) {
             e.printStackTrace();
             throw e;
