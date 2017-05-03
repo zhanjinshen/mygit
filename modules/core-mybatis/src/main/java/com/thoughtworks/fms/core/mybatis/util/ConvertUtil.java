@@ -28,7 +28,7 @@ public class ConvertUtil {
         try {
             String fileName = sourceFile.getName().substring(0, sourceFile.getName().lastIndexOf("."));
             File swfFile = new File(FILE_SERVERS+fileName + ".swf");
-            LOGGER.info("获取pdf文件路径："+swfFile.getPath());
+            LOGGER.info("获取pdf文件路径："+fileName);
             File targetFile =swfFile;
             /**
              * SWFTools_HOME在系统中的安装目录
@@ -46,6 +46,7 @@ public class ConvertUtil {
             LOGGER.info("*******pdf2swf开始执行文件转换********");
             Process pro =Runtime.getRuntime().exec(cmd);
             LOGGER.info("*******pdf2swf文件转换完成********");
+            LOGGER.info("*******pdf2swf文件转换完成，生成的swf文件路径为："+targetFile.getPath());
 //           如果不读取流则targetFile.exists() 文件不存在，但是程序没有问题
 //          BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(pro.getInputStream()));
 //          while (bufferedReader.readLine() != null);
