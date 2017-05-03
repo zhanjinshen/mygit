@@ -7,6 +7,8 @@ import com.thoughtworks.fms.api.service.ClientService;
 import com.thoughtworks.fms.api.service.FileService;
 import com.thoughtworks.fms.api.service.SessionService;
 import com.thoughtworks.fms.api.service.ValidationService;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -33,7 +35,7 @@ import static java.util.stream.Collectors.toList;
 @Path("files")
 public class FilesResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilesResource.class);
-
+    private final String CONVERTFILETYPE = "jpg,jpeg,font,gif,png,wav";
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadFile(FormDataMultiPart multiPart,
@@ -63,7 +65,6 @@ public class FilesResource {
     }
 
 
-
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/uploadFileForCredit")
@@ -77,42 +78,48 @@ public class FilesResource {
                                     @Context SessionService sessionService) throws UnsupportedEncodingException {
 
         String destName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
-        String source= servletRequest.getParameter("source");
+        String source = servletRequest.getParameter("source");
         String sourceName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
         InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
-       String newFilePath= fileService.saveUploadFileForView(inputStream,destName);
-        System.out.println("文件生成路径："+newFilePath);
+        String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
+        System.out.println("文件生成路径：" + newFilePath);
         LOGGER.info("文件生成路径=" + newFilePath);
         long fileId;
-            try {
-                if(""!=newFilePath){
+        try {
+            if ("" != newFilePath) {
+                if (CONVERTFILETYPE.indexOf(FilenameUtils.getExtension(newFilePath))>-1) {
+                    File newFile = new File(newFilePath);
+                    fileService.convertForView(newFile);
+                    newFile.delete();
+                } else {
                     System.out.println("开始执行转换");
                     LOGGER.info("开始执行转换");
-              Map<String,Object> fileMap=  fileService.doc2swf(newFilePath);
-                    if(fileMap.containsKey("docFile")){
-                        File docFile=(File)fileMap.get("docFile");
-                        //docFile.delete();
+                    Map<String, Object> fileMap = fileService.doc2swf(newFilePath);
+                    if (fileMap.containsKey("docFile")) {
+                        File docFile = (File) fileMap.get("docFile");
+                        docFile.delete();
                         LOGGER.info("doc文件成功生成=" + docFile);
                         System.out.println("doc文件成功生成");
                     }
-                    if(fileMap.containsKey("pdfFile")){
-                        File pdfFile=(File)fileMap.get("pdfFile");
+                    if (fileMap.containsKey("pdfFile")) {
+                        File pdfFile = (File) fileMap.get("pdfFile");
                         fileService.convertForView(pdfFile);
-                        //pdfFile.delete();
+                        pdfFile.delete();
                         System.out.println("pdf文件成功生成，并且转换成swf文件成功");
                         LOGGER.info("pdf文件成功生成，并且转换成swf文件成功=" + pdfFile);
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }finally {
-                //文件上传到oss
-              fileId = fileService.storeForCredit(sourceName, destName, inputStream,source);
-//        String url= fileService.getUrl(destName);
-                //credit固定路径
-                String uri ="/creditAttachment/saveCreditAttachmentByFileId";
-                clientService.informCredit(uri, fileId, sourceName, destName);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //文件上传到oss
+            fileId = fileService.storeForCredit(sourceName, destName, inputStream, source);
+//        String url= fileService.getUrl(destName);
+            //credit固定路径
+            String uri = "/creditAttachment/saveCreditAttachmentByFileId";
+            clientService.informCredit(uri, fileId, sourceName, destName);
+        }
 
         //将上传的文件进行备份用作预览处理
 
@@ -122,12 +129,12 @@ public class FilesResource {
     @GET
     @Path("/downloadFileForCredit")
     public Response downloadFileForCredit(@Context ServerProperties properties,
-                                 @Context HttpServletRequest servletRequest,
-                                 @Context FileService fileService,
-                                 @Context ValidationService validationService,
-                                 @Context SessionService sessionService) throws UnsupportedEncodingException {
-    	Object fileIds =servletRequest.getParameter("fileIds");
-    	Object fileName =servletRequest.getParameter("fileName");
+                                          @Context HttpServletRequest servletRequest,
+                                          @Context FileService fileService,
+                                          @Context ValidationService validationService,
+                                          @Context SessionService sessionService) throws UnsupportedEncodingException {
+        Object fileIds = servletRequest.getParameter("fileIds");
+        Object fileName = servletRequest.getParameter("fileName");
 //        String fileIds = sessionService.getAttribute(servletRequest,"fileIds".toString()).toString();
 //        String fileName = sessionService.getAttribute(servletRequest,"fileName".toString()).toString();
         String userAgent = servletRequest.getHeader("User-Agent");
@@ -155,7 +162,6 @@ public class FilesResource {
         String userAgent = servletRequest.getHeader("User-Agent");
         return getResponse(fileService, fileIds, fileName, userAgent);
     }
-
 
 
     @GET
@@ -200,13 +206,11 @@ public class FilesResource {
                 zipFile.delete();
             }
         };
-
         return Response
                 .ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
                 .header("content-disposition", getContentDispositionFileName(userAgent, zipFile.getName()))
                 .build();
     }
-
     private String getContentDispositionFileName(String userAgent, String fileName) throws UnsupportedEncodingException {
         LOGGER.debug("userAgent=" + userAgent);
         if (userAgent.indexOf("MSIE") != -1) {
@@ -214,8 +218,5 @@ public class FilesResource {
         } else {
             return "attachment; filename*=UTF-8''" + URLEncoder.encode(fileName, "UTF-8");
         }
-
     }
-
-
 }
