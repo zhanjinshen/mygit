@@ -27,7 +27,7 @@ public class ConvertUtil {
     public static boolean convert(File sourceFile) {
         try {
             String fileName = sourceFile.getName().substring(0, sourceFile.getName().lastIndexOf("."));
-            File swfFile = new File(FILE_SERVERS+fileName + ".swf");
+            File swfFile = new File(FILE_SERVERS+"/"+fileName + ".swf");
             LOGGER.info("获取pdf文件路径："+fileName);
             File targetFile =swfFile;
             /**
