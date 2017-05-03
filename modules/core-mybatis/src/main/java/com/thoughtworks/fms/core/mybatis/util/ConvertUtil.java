@@ -112,11 +112,11 @@ public class ConvertUtil {
                     fileMap.put("docFile", docFile);
                 } catch (java.net.ConnectException e) {
                     e.printStackTrace();
-                    LOGGER.error("使用openOffice将文件转成pdf失败");
+                    LOGGER.error("使用openOffice将文件转成pdf失败java.net.ConnectException",e);
                     throw e;
                 } catch (com.artofsolving.jodconverter.openoffice.connection.OpenOfficeException e) {
                     e.printStackTrace();
-                    LOGGER.error("使用openOffice将文件转成pdf失败");
+                    LOGGER.error("使用openOffice将文件转成pdf失败com.artofsolving.jodconverter.openoffice.connection.OpenOfficeException",e);
                     throw e;
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -77,9 +77,8 @@ public class ConvertToSwf {
                 filetype = "jpeg";
             }
             List<String> command = new ArrayList<String>();
-            command.add(this.swftoolsPath + "\\" + filetype.toLowerCase() + swftoolsExecute);//从配
+            command.add(this.swftoolsPath + "\\" + filetype.toLowerCase() + swftoolsExecute);//从配置文件里读取
             LOGGER.info("*******************************swf启动命令："+this.swftoolsPath + "\\" + filetype.toLowerCase() + swftoolsExecute);
-            //置文件里读取
             command.add("-z");
             command.add("-s");
             command.add("flashversion=9");
