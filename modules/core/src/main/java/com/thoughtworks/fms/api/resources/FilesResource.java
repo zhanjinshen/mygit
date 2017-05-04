@@ -84,13 +84,15 @@ public class FilesResource {
         String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
         System.out.println("文件生成路径：" + newFilePath);
         LOGGER.info("文件生成路径=" + newFilePath);
-        long fileId;
+
+//        long fileId;
+        String fileId ="";
         try {
             if ("" != newFilePath) {
                 if (CONVERTFILETYPE.indexOf(FilenameUtils.getExtension(newFilePath))>-1) {
                     LOGGER.info("除pdf格式外的文件开始执行转换");
                     File newFile = new File(newFilePath);
-                    fileService.convertForView(newFile);
+                    fileId=  fileService.convertForView(newFile);
                     newFile.delete();
                 } else {
                     LOGGER.info("开始执行转换");
@@ -102,7 +104,7 @@ public class FilesResource {
                     }
                     if (fileMap.containsKey("pdfFile")) {
                         File pdfFile = (File) fileMap.get("pdfFile");
-                        fileService.convertForView(pdfFile);
+                        fileId=   fileService.convertForView(pdfFile);
                         pdfFile.delete();
                         LOGGER.info("pdf文件成功生成，并且转换成swf文件成功=" + pdfFile);
                     }
@@ -112,16 +114,17 @@ public class FilesResource {
             e.printStackTrace();
         } finally {
             //文件上传到oss
-            fileId = fileService.storeForCredit(sourceName, destName, inputStream, source);
+//            fileId = fileService.storeForCredit(sourceName, destName, inputStream, source);
+                fileService.storeForCredit(sourceName, destName, inputStream, source);
 //        String url= fileService.getUrl(destName);
             //credit固定路径
             String uri = "/creditAttachment/saveCreditAttachmentByFileId";
-            clientService.informCredit(uri, fileId, sourceName, destName);
+            clientService.informCredit(uri, Long.valueOf(fileId), sourceName, destName);
         }
 
         //将上传的文件进行备份用作预览处理
 
-        return fileId;
+        return Long.valueOf(fileId);
     }
 
     @GET

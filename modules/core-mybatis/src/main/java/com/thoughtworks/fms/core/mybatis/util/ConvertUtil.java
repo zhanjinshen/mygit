@@ -27,14 +27,19 @@ public class ConvertUtil {
     private static final String START_OPENOFFICE_COMMAND = PropertiesLoader.getProperty("start.OpenOffice.command");
     private static final String OPENOFFICE_SERVERS_IP = PropertiesLoader.getProperty("openoffice.servers.ip");
     private static final String OPENOFFICE_SERVERS_PORT = PropertiesLoader.getProperty("openoffice.servers.port");
-    public static boolean convert(File sourceFile) {
+    public static String convert(File sourceFile) {
+        String url="";
         try {
             String fileName = sourceFile.getName().substring(0, sourceFile.getName().lastIndexOf("."));
             File swfFile = new File(FILE_SERVERS + "/" + fileName + ".swf");
             LOGGER.info("获取pdf文件路径：" + fileName);
             File targetFile = swfFile;
             ConvertToSwf convertToSwf =new ConvertToSwf(SWFTools_SERVERS,SWFTools_SERVERS_EXECUTE);
-            convertToSwf.convertFileToSwf(sourceFile.getAbsolutePath(),targetFile.getAbsolutePath());
+            boolean res=convertToSwf.convertFileToSwf(sourceFile.getAbsolutePath(),targetFile.getAbsolutePath());
+
+            if (res){
+                url=fileName;
+            }
 //            /**
 //             * SWFTools_HOME在系统中的安装目录
 //             * 1：window需要指定到 pdf2swf.exe 文件
@@ -59,9 +64,9 @@ public class ConvertUtil {
 //            pro.exitValue();
         } catch (Exception e) {
             System.out.println("pdf转换swf失败");
-            return false;
+            return url;
         }
-        return true;
+        return url;
     }
 
     public static Map doc2swf(String fileString) throws Exception {

@@ -21,7 +21,7 @@ public interface FileService {
 
     InputStream fetchForCredit(String destName);
 
-    public  boolean convertForView(File sourceFile);
+    public  String convertForView(File sourceFile);
 
     public  Map doc2swf(String fileString) throws Exception;
 

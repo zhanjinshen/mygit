@@ -155,7 +155,7 @@ public class DefaultFileService implements FileService {
     }
 
     @Override
-    public boolean convertForView(File sourceFile) {
+    public String convertForView(File sourceFile) {
         return ConvertUtil.convert(sourceFile);
     }
 
