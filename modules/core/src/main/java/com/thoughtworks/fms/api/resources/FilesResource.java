@@ -86,7 +86,7 @@ public class FilesResource {
         LOGGER.info("文件生成路径=" + newFilePath);
 
 //        long fileId;
-        String fileId ="";
+        String fileId ="0";
         try {
             if ("" != newFilePath) {
                 if (CONVERTFILETYPE.indexOf(FilenameUtils.getExtension(newFilePath))>-1) {
