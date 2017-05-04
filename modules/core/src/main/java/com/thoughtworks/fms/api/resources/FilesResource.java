@@ -35,7 +35,7 @@ import static java.util.stream.Collectors.toList;
 @Path("files")
 public class FilesResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilesResource.class);
-    private final String CONVERTFILETYPE = "jpg,jpeg,font,gif,png,wav";
+    private final String CONVERTFILETYPE = "pdf,jpg,jpeg,font,gif,png,wav";
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadFile(FormDataMultiPart multiPart,
