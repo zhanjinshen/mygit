@@ -8,6 +8,11 @@
         VALUES (#{sourceName}, #{destName}, #{suffix}, #{fileSize})
     </insert>
 
+    <insert id="createMetadataForCredit" useGeneratedKeys="true" keyProperty="piggyback.id" keyColumn="id">
+        INSERT INTO FMS_FILE_METADATA(SOURCE_NAME, DEST_NAME, SUFFIX, SIZE,SWF_FILE_NAME)
+        VALUES (#{sourceName}, #{destName}, #{suffix}, #{fileSize},#{swfName})
+    </insert>
+
     <select id="findMetadataById" resultMap="records.fileMetadata">
         SELECT
         <include refid="columns.fileMetadata"/>

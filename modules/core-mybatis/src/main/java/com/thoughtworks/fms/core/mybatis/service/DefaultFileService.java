@@ -86,7 +86,7 @@ public class DefaultFileService implements FileService {
     }
 
     @Override
-    public long storeForCredit(String sourceName, String destName, InputStream inputStream,String userId) {
+    public long storeForCredit(String sourceName, String destName, InputStream inputStream,String userId,String swfName) {
         String suffix = getAcceptedSuffix(sourceName);
         String newName= destName.replaceAll("."+suffix,"");
         StringBuilder sb = new StringBuilder();
@@ -109,7 +109,7 @@ public class DefaultFileService implements FileService {
             throw new InternalServerException(FMSErrorCode.UPLOAD_FILE_FAIL, e);
         }
 
-        return repository.storeMetadata(sourceName, finalName, "." + suffix, count);
+        return repository.storeMetadataForCredit(sourceName, finalName, "." + suffix, count,swfName);
     }
 
     private String getAcceptedSuffix(String name) {

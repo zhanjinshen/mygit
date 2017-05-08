@@ -15,7 +15,7 @@ public interface FileService {
     
     String getUrl(String key);
 
-    long storeForCredit(String sourceName, String destName, InputStream inputStream,String source);
+    long storeForCredit(String sourceName, String destName, InputStream inputStream,String source,String swfName);
 
     File fetchForCredit(List<Long> fileIds, String zipFileName);
 

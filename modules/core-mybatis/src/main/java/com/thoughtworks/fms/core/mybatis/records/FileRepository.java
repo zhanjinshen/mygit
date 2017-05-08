@@ -23,6 +23,12 @@ public class FileRepository implements com.thoughtworks.fms.core.FileRepository 
         metadataMapper.createMetadata(sourceName, destName, suffix, size, piggyback);
         return piggyback.get("id");
     }
+    @Override
+    public long storeMetadataForCredit(String sourceName, String destName, String suffix, long size,String swfName) {
+        Map<String, Long> piggyback = new HashMap<>();
+        metadataMapper.createMetadataForCredit(sourceName, destName, suffix, size, piggyback,swfName);
+        return piggyback.get("id");
+    }
 
     @Override
     public FileMetadata findMetadataById(long fileId) {

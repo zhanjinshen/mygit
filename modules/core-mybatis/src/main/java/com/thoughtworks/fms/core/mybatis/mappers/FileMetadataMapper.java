@@ -14,6 +14,13 @@ public interface FileMetadataMapper {
                         @Param("fileSize") long size,
                         @Param("piggyback") Map<String, Long> piggyback);
 
+    void createMetadataForCredit(@Param("sourceName") String sourceName,
+                        @Param("destName") String destName,
+                        @Param("suffix") String suffix,
+                        @Param("fileSize") long size,
+                        @Param("piggyback") Map<String, Long> piggyback,
+                        @Param("swfName") String swfName);
+
     FileMetadata findMetadataById(@Param("id") long id);
 
     List<FileMetadata> findMetadataByIds(@Param("ids") List<Long> fileIds);

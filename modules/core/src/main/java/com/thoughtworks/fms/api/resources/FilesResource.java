@@ -80,19 +80,21 @@ public class FilesResource {
         String destName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
         String source = servletRequest.getParameter("source");
         String sourceName = new String(metadata.getFileName().getBytes("ISO-8859-1"));
+        //这里将文件实例化为两个流，一个用作oss上传一个用作文件转换，感觉写法有点尴尬，目前没有什么比较好的处理办法
         InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
+        InputStream inputStreamForUpload = multiPart.getField("file").getValueAs(InputStream.class);
         String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
         System.out.println("文件生成路径：" + newFilePath);
         LOGGER.info("文件生成路径=" + newFilePath);
 
-//        long fileId;
-        String fileId ="0";
+        long fileId;
+        String url ="0";
         try {
             if ("" != newFilePath) {
                 if (CONVERTFILETYPE.indexOf(FilenameUtils.getExtension(newFilePath))>-1) {
                     LOGGER.info("除pdf格式外的文件开始执行转换");
                     File newFile = new File(newFilePath);
-                    fileId=  fileService.convertForView(newFile);
+                    url=  fileService.convertForView(newFile);
                     newFile.delete();
                 } else {
                     LOGGER.info("开始执行转换");
@@ -104,7 +106,7 @@ public class FilesResource {
                     }
                     if (fileMap.containsKey("pdfFile")) {
                         File pdfFile = (File) fileMap.get("pdfFile");
-                        fileId=   fileService.convertForView(pdfFile);
+                        url=   fileService.convertForView(pdfFile);
                         pdfFile.delete();
                         LOGGER.info("pdf文件成功生成，并且转换成swf文件成功=" + pdfFile);
                     }
@@ -114,17 +116,14 @@ public class FilesResource {
             e.printStackTrace();
         } finally {
             //文件上传到oss
-//            fileId = fileService.storeForCredit(sourceName, destName, inputStream, source);
-                fileService.storeForCredit(sourceName, destName, inputStream, source);
+           fileId = fileService.storeForCredit(sourceName, destName, inputStreamForUpload, source,url);
+  //              fileService.storeForCredit(sourceName, destName, inputStream, source);
 //        String url= fileService.getUrl(destName);
             //credit固定路径
             String uri = "/creditAttachment/saveCreditAttachmentByFileId";
-            clientService.informCredit(uri, Long.valueOf(fileId), sourceName, destName);
+            clientService.informCredit(uri, fileId, sourceName, destName);
         }
-
-        //将上传的文件进行备份用作预览处理
-
-        return Long.valueOf(fileId);
+        return Long.valueOf(url);
     }
 
     @GET
