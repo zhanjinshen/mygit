@@ -1,5 +1,7 @@
 package com.thoughtworks.fms.api.service;
 
+import com.thoughtworks.fms.core.FileMetadata;
+
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
@@ -28,4 +30,6 @@ public interface FileService {
     public   void runOpenOffice() throws Exception;
 
     public  String saveUploadFileForView(InputStream inputStreamFile,String destName);
+
+    public FileMetadata findMetadataById(long fileId);
 }

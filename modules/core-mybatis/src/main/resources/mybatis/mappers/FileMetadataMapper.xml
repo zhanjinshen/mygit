@@ -30,4 +30,10 @@
         </foreach>
     </select>
 
+    <update id="updateSwfFileNameMetadataById" useGeneratedKeys="true" keyProperty="id">
+        UPDATE  FMS_FILE_METADATA
+        SET SWF_FILE_NAME=#{swfFileName}
+        WHERE ID=#{id}
+    </update>
+
 </mapper>

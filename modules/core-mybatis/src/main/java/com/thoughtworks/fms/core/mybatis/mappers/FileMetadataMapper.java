@@ -25,4 +25,6 @@ public interface FileMetadataMapper {
 
     List<FileMetadata> findMetadataByIds(@Param("ids") List<Long> fileIds);
 
+    long updateSwfFileNameMetadataById(@Param("id") long id,@Param("swfFileName") String swfFileName);
+
 }

@@ -3,6 +3,7 @@ package com.thoughtworks.fms.core.mybatis.service;
 import com.aliyun.oss.ClientConfiguration;
 import com.aliyun.oss.OSSClient;
 import com.google.common.base.Splitter;
+import com.thoughtworks.fms.api.resources.FilesResource;
 import com.thoughtworks.fms.api.service.FileService;
 import com.thoughtworks.fms.core.Cipher;
 import com.thoughtworks.fms.core.FileMetadata;
@@ -18,6 +19,10 @@ import com.thoughtworks.fms.core.mybatis.util.PropertiesLoader;
 import com.thoughtworks.fms.exception.DecryptionException;
 import com.thoughtworks.fms.exception.EncryptionException;
 import com.thoughtworks.fms.exception.TransferException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.servlet.ServletOutputStream;
@@ -31,6 +36,13 @@ import java.util.zip.ZipOutputStream;
 import static java.util.stream.Collectors.toList;
 
 public class DefaultFileService implements FileService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFileService.class);
+
+    private static final String FILE_SERVERS = PropertiesLoader.getProperty("file.servers");
+
+
+
+
     private static final int BUFFER = 2048;
     private static final int EOF = -1;
     private static List<String> ACCEPT_EXTENSIONS = Splitter.on(",")
@@ -175,6 +187,11 @@ public class DefaultFileService implements FileService {
     }
 
     @Override
+    public FileMetadata findMetadataById(long fileId) {
+        return repository.findMetadataById(fileId);
+    }
+
+    @Override
     public File fetch(List<Long> fileIds, String zipFileName) {
         List<FileMetadata> metadatas = repository.findMetadataByIds(fileIds);
         List<Entry> entries = metadatas.stream().parallel()
@@ -196,17 +213,26 @@ public class DefaultFileService implements FileService {
                     fileName = fileName.replaceAll(".*/(.*)", "$1");
                     return new Entry(fileName, fetchForCredit(metadata.getDestName()));
                 }).collect(toList());
-
-        return compressZip(zipFileName, entries);
+      File newFile=  getFileForView(zipFileName, entries);
+        //将新生成的文件名存入数据库
+        repository.updateSwfFileNameMetadataById(fileIds.get(0), FilenameUtils.getBaseName(newFile.getAbsolutePath()));
+        return newFile;
     }
     private File getFileForView(String zipFileName, List<Entry> entries) {
-        File zipFile = FileBuilder.builder(zipFileName).build();
-        try (ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile), BUFFER))) {
+        String newFilePath = "";
+        File newFile=null;
+        try {
             byte data[] = new byte[BUFFER];
             for (Entry entry : entries) {
                 try (BufferedInputStream origin = new BufferedInputStream(entry.getInputStream())) {
-                    String resfile = "E:/test/photo4.doc";
-                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(resfile)));
+                    LOGGER.info("获取文件存放路径："+FILE_SERVERS);
+                    String resfile = "";
+                    resfile = System.currentTimeMillis()
+                            + zipFileName.substring(
+                            zipFileName.lastIndexOf('.'));
+                    newFilePath=FILE_SERVERS+resfile;
+                    newFile =new File(newFilePath);
+                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(newFilePath)));
                     int itemp = 0;
                     while((itemp = origin.read()) != -1){
                         bos.write(itemp);
@@ -214,20 +240,13 @@ public class DefaultFileService implements FileService {
                     System.out.println("文件获取成功"); //console log :文件获取成功
 //                    origin.close();
                     bos.close();
-                    ZipEntry zipEntry = new ZipEntry(entry.getName());
-                    out.putNextEntry(zipEntry);
 
-                    int count;
-                    while ((count = origin.read(data)) != EOF) {
-                        out.write(data, 0, count);
-                    }
                 }
             }
         } catch (IOException e) {
             throw new InternalServerException(FMSErrorCode.SERVER_INTERNAL_ERROR, e);
         }
-
-        return zipFile;
+        return newFile;
     }
 
     private File compressZip(String zipFileName, List<Entry> entries) {

@@ -50,4 +50,9 @@ public class FileRepository implements com.thoughtworks.fms.core.FileRepository 
         return metadataMapper.findMetadataByIds(fileIds);
     }
 
+    @Override
+    public long updateSwfFileNameMetadataById(long fileId, String swfFileName) {
+        return metadataMapper.updateSwfFileNameMetadataById(fileId,swfFileName);
+    }
+
 }

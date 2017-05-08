@@ -11,6 +11,7 @@
         <result column="FFM_SUFFIX" property="suffix"/>
         <result column="FFM_SIZE" property="size"/>
         <result column="FFM_CREATED_AT" property="createdAt"/>
+        <result column="FFM_SWF_FILE_NAME" property="swfFileName"/>
     </resultMap>
 
 </mapper>

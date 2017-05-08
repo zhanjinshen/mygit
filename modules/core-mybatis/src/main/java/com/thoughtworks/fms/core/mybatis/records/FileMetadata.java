@@ -10,6 +10,7 @@ public class FileMetadata implements com.thoughtworks.fms.core.FileMetadata {
     private String destName;
     private long size;
     private DateTime createdAt;
+    private String swfFileName;
 
     @Override
     public long getId() {
@@ -40,5 +41,11 @@ public class FileMetadata implements com.thoughtworks.fms.core.FileMetadata {
     public DateTime getCreatedAt() {
         return createdAt;
     }
+
+    @Override
+    public String getSwfFileName() {
+        return swfFileName;
+    }
+
 
 }

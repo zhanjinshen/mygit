@@ -1,12 +1,14 @@
 package com.thoughtworks.fms.api.resources;
 
 import com.google.common.base.Splitter;
+import com.sun.deploy.util.StringUtils;
 import com.thoughtworks.fms.api.Json;
 import com.thoughtworks.fms.api.filter.SystemAuthentication;
 import com.thoughtworks.fms.api.service.ClientService;
 import com.thoughtworks.fms.api.service.FileService;
 import com.thoughtworks.fms.api.service.SessionService;
 import com.thoughtworks.fms.api.service.ValidationService;
+import com.thoughtworks.fms.core.FileMetadata;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -68,7 +70,7 @@ public class FilesResource {
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/uploadFileForCredit")
-    public long uploadFileForCredit(FormDataMultiPart multiPart,
+    public String uploadFileForCredit(FormDataMultiPart multiPart,
                                     @FormDataParam("file") FormDataContentDisposition metadata,
                                     @Context ServerProperties properties,
                                     @Context HttpServletRequest servletRequest,
@@ -88,7 +90,7 @@ public class FilesResource {
         LOGGER.info("文件生成路径=" + newFilePath);
 
         long fileId;
-        String url ="0";
+        String url ="";
         try {
             if ("" != newFilePath) {
                 if (CONVERTFILETYPE.indexOf(FilenameUtils.getExtension(newFilePath))>-1) {
@@ -123,12 +125,37 @@ public class FilesResource {
             String uri = "/creditAttachment/saveCreditAttachmentByFileId";
             clientService.informCredit(uri, fileId, sourceName, destName);
         }
-        return Long.valueOf(url);
+        return url;
     }
+
+    /**
+     * credit下载原始代码
+     * @param properties
+     * @param servletRequest
+     * @param fileService
+     * @param validationService
+     * @param sessionService
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+//    @GET
+//    @Path("/downloadFileForCredit")
+//    public Response downloadFileForCredit(@Context ServerProperties properties,
+//                                          @Context HttpServletRequest servletRequest,
+//                                          @Context FileService fileService,
+//                                          @Context ValidationService validationService,
+//                                          @Context SessionService sessionService) throws UnsupportedEncodingException {
+//        Object fileIds = servletRequest.getParameter("fileIds");
+//        Object fileName = servletRequest.getParameter("fileName");
+////        String fileIds = sessionService.getAttribute(servletRequest,"fileIds".toString()).toString();
+////        String fileName = sessionService.getAttribute(servletRequest,"fileName".toString()).toString();
+//        String userAgent = servletRequest.getHeader("User-Agent");
+//        return getResponseForCredit(fileService, fileIds.toString(), fileName.toString(), userAgent);
+//    }
 
     @GET
     @Path("/downloadFileForCredit")
-    public Response downloadFileForCredit(@Context ServerProperties properties,
+    public String downloadFileForCredit(@Context ServerProperties properties,
                                           @Context HttpServletRequest servletRequest,
                                           @Context FileService fileService,
                                           @Context ValidationService validationService,
@@ -138,8 +165,45 @@ public class FilesResource {
 //        String fileIds = sessionService.getAttribute(servletRequest,"fileIds".toString()).toString();
 //        String fileName = sessionService.getAttribute(servletRequest,"fileName".toString()).toString();
         String userAgent = servletRequest.getHeader("User-Agent");
-        return getResponseForCredit(fileService, fileIds.toString(), fileName.toString(), userAgent);
+        if(null==fileIds){
+            return "";
+        }
+        FileMetadata fileMetadata= fileService.findMetadataById(Long.valueOf(fileIds.toString()));
+        if (null!=fileMetadata&&null!=fileMetadata.getSwfFileName()&&!"".equals(fileMetadata.getSwfFileName())){
+                return fileMetadata.getSwfFileName();
+        }
+        String swfUrl= getSwfUrlForCredit(fileService, fileIds.toString(), fileName.toString(), userAgent);
+        String url ="";
+        try {
+            LOGGER.info("（下载）文件转换开始");
+            if ("" != swfUrl) {
+                if (CONVERTFILETYPE.indexOf(FilenameUtils.getExtension(swfUrl))>-1) {
+                    LOGGER.info("除pdf格式外的文件开始执行转换");
+                    File newFile = new File(swfUrl);
+                    url=  fileService.convertForView(newFile);
+                    newFile.delete();
+                } else {
+                    LOGGER.info("（下载）开始执行转换");
+                    Map<String, Object> fileMap = fileService.doc2swf(swfUrl);
+                    if (fileMap.containsKey("docFile")) {
+                        File docFile = (File) fileMap.get("docFile");
+                        docFile.delete();
+                        LOGGER.info("doc文件成功生成=" + docFile);
+                    }
+                    if (fileMap.containsKey("pdfFile")) {
+                        File pdfFile = (File) fileMap.get("pdfFile");
+                        url=   fileService.convertForView(pdfFile);
+                        pdfFile.delete();
+                        LOGGER.info("（下载）pdf文件成功生成，并且转换成swf文件成功=" + pdfFile);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return url;
     }
+
 
 
     @GET
@@ -211,6 +275,15 @@ public class FilesResource {
                 .header("content-disposition", getContentDispositionFileName(userAgent, zipFile.getName()))
                 .build();
     }
+
+    private String getSwfUrlForCredit(FileService fileService, String fileIds, String fileName, String userAgent) throws UnsupportedEncodingException {
+        List<Long> fileIdsList = Splitter.on(",").splitToList(fileIds)
+                .stream().map(Long::valueOf).collect(toList());
+        final File swfFile = fileService.fetchForCredit(fileIdsList, fileName);
+       return swfFile.getPath();
+    }
+
+
     private String getContentDispositionFileName(String userAgent, String fileName) throws UnsupportedEncodingException {
         LOGGER.debug("userAgent=" + userAgent);
         if (userAgent.indexOf("MSIE") != -1) {
