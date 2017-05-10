@@ -1,7 +1,6 @@
 package com.thoughtworks.fms.api.resources;
 
 import com.google.common.base.Splitter;
-import com.sun.deploy.util.StringUtils;
 import com.thoughtworks.fms.api.Json;
 import com.thoughtworks.fms.api.filter.SystemAuthentication;
 import com.thoughtworks.fms.api.service.ClientService;
@@ -9,7 +8,6 @@ import com.thoughtworks.fms.api.service.FileService;
 import com.thoughtworks.fms.api.service.SessionService;
 import com.thoughtworks.fms.api.service.ValidationService;
 import com.thoughtworks.fms.core.FileMetadata;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;

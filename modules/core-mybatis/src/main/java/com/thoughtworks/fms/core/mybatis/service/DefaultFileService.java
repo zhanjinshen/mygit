@@ -3,7 +3,6 @@ package com.thoughtworks.fms.core.mybatis.service;
 import com.aliyun.oss.ClientConfiguration;
 import com.aliyun.oss.OSSClient;
 import com.google.common.base.Splitter;
-import com.thoughtworks.fms.api.resources.FilesResource;
 import com.thoughtworks.fms.api.service.FileService;
 import com.thoughtworks.fms.core.Cipher;
 import com.thoughtworks.fms.core.FileMetadata;
@@ -19,14 +18,11 @@ import com.thoughtworks.fms.core.mybatis.util.PropertiesLoader;
 import com.thoughtworks.fms.exception.DecryptionException;
 import com.thoughtworks.fms.exception.EncryptionException;
 import com.thoughtworks.fms.exception.TransferException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.servlet.ServletOutputStream;
-
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -230,7 +226,7 @@ public class DefaultFileService implements FileService {
                     resfile = System.currentTimeMillis()
                             + zipFileName.substring(
                             zipFileName.lastIndexOf('.'));
-                    newFilePath=FILE_SERVERS+resfile;
+                    newFilePath=FILE_SERVERS+"/"+resfile;
                     newFile =new File(newFilePath);
                     BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(newFilePath)));
                     int itemp = 0;
