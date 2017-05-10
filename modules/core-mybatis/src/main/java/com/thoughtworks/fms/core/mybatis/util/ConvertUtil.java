@@ -31,7 +31,8 @@ public class ConvertUtil {
         String url="";
         try {
             String fileName = sourceFile.getName().substring(0, sourceFile.getName().lastIndexOf("."));
-            File swfFile = new File(FILE_SERVERS + "/" + fileName + ".swf");
+           String date= DateTimeHelper.stampToDate(fileName);
+            File swfFile = new File(FILE_SERVERS + "/"+ date+"/" + fileName + ".swf");
             LOGGER.info("获取pdf文件路径：" + fileName);
             File targetFile = swfFile;
             ConvertToSwf convertToSwf =new ConvertToSwf(SWFTools_SERVERS,SWFTools_SERVERS_EXECUTE);
