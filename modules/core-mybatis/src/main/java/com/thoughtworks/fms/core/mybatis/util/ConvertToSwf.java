@@ -81,7 +81,7 @@ public class ConvertToSwf {
             LOGGER.info("*******************************swf启动命令："+this.swftoolsPath + filetype.toLowerCase() + swftoolsExecute);
 //            command.add("-z");
 //            command.add("-s");
-//            command.add("flashversion=9");
+//            command.add("-s flashversion=9");
 //            command.add("-s");
 //            command.add("poly2bitmap");//加入poly2bitmap的目的是为了防止出现大文件或图形过多的文件转换时的出错，没有生成swf文件的异常
 //            command.add("multiply=2");//在几倍分辨率下进行转换
@@ -90,6 +90,7 @@ public class ConvertToSwf {
             command.add(sourceFilePath);
             command.add("-o");
             command.add(swfFilePath);
+            command.add("-T 9");
             try {
                 ProcessBuilder processBuilder = new ProcessBuilder();
                 processBuilder.command(command);
