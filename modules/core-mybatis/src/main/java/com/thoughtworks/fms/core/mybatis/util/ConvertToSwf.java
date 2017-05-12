@@ -22,12 +22,14 @@ public class ConvertToSwf {
         private final String CONVERTFILETYPE = "pdf,jpg,jpeg,font,gif,png,wav";
         private String swftoolsPath;
         private String swftoolsExecute;
+        private String swftoolsLanguage;
         /**
          * @param swftoolsPath 用于进行把文件转化为swf的工具地址
          */
-        public ConvertToSwf(String swftoolsPath,String swftoolsExecute) {
+        public ConvertToSwf(String swftoolsPath,String swftoolsExecute,String swftoolsLanguage) {
             this.swftoolsPath = swftoolsPath;
            this.swftoolsExecute = swftoolsExecute;
+            this.swftoolsLanguage=swftoolsLanguage;
         }
         /**
          * 把文件转化为swf格式支持"pdf,jpg,jpeg,font,gif,png,wav"
@@ -91,6 +93,7 @@ public class ConvertToSwf {
             command.add("-o");
             command.add(swfFilePath);
             command.add("-T 9");
+            command.add(swftoolsLanguage);
             try {
                 ProcessBuilder processBuilder = new ProcessBuilder();
                 processBuilder.command(command);

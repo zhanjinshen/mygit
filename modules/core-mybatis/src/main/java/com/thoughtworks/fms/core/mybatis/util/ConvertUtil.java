@@ -27,6 +27,7 @@ public class ConvertUtil {
     private static final String START_OPENOFFICE_COMMAND = PropertiesLoader.getProperty("start.OpenOffice.command");
     private static final String OPENOFFICE_SERVERS_IP = PropertiesLoader.getProperty("openoffice.servers.ip");
     private static final String OPENOFFICE_SERVERS_PORT = PropertiesLoader.getProperty("openoffice.servers.port");
+    private static final String SWFTools_LANGUAGE = PropertiesLoader.getProperty("swftools.language");
     public static String convert(File sourceFile) {
         String url="";
         try {
@@ -35,7 +36,7 @@ public class ConvertUtil {
             File swfFile = new File(FILE_SERVERS + "/"+ date+"/" + fileName + ".swf");
             LOGGER.info("获取pdf文件路径：" + fileName);
             File targetFile = swfFile;
-            ConvertToSwf convertToSwf =new ConvertToSwf(SWFTools_SERVERS,SWFTools_SERVERS_EXECUTE);
+            ConvertToSwf convertToSwf =new ConvertToSwf(SWFTools_SERVERS,SWFTools_SERVERS_EXECUTE,SWFTools_LANGUAGE);
             boolean res=convertToSwf.convertFileToSwf(sourceFile.getAbsolutePath(),targetFile.getAbsolutePath());
 
             if (res){
