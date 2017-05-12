@@ -1,7 +1,6 @@
 package com.thoughtworks.fms.api.resources;
 
 import com.google.common.base.Splitter;
-import com.sun.deploy.util.StringUtils;
 import com.thoughtworks.fms.api.Json;
 import com.thoughtworks.fms.api.filter.SystemAuthentication;
 import com.thoughtworks.fms.api.service.ClientService;
