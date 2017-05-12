@@ -1,6 +1,7 @@
 package com.thoughtworks.fms.api.resources;
 
 import com.google.common.base.Splitter;
+import com.sun.deploy.util.StringUtils;
 import com.thoughtworks.fms.api.Json;
 import com.thoughtworks.fms.api.filter.SystemAuthentication;
 import com.thoughtworks.fms.api.service.ClientService;
@@ -121,7 +122,7 @@ public class FilesResource {
 //        String url= fileService.getUrl(destName);
             //credit固定路径
             String uri = "/creditAttachment/saveCreditAttachmentByFileId";
-            clientService.informCredit(uri, fileId, sourceName, destName);
+            clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, sourceName, destName);
         }
         return url;
     }
