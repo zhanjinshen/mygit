@@ -95,19 +95,19 @@ public class FilesResource {
                     LOGGER.info("除pdf格式外的文件开始执行转换");
                     File newFile = new File(newFilePath);
                     url=  fileService.convertForView(newFile);
-//                    newFile.delete();
+                    newFile.delete();
                 } else {
                     LOGGER.info("开始执行转换");
                     Map<String, Object> fileMap = fileService.doc2swf(newFilePath);
                     if (fileMap.containsKey("docFile")) {
                         File docFile = (File) fileMap.get("docFile");
-//                        docFile.delete();
+                        docFile.delete();
                         LOGGER.info("doc文件成功生成=" + docFile);
                     }
                     if (fileMap.containsKey("pdfFile")) {
                         File pdfFile = (File) fileMap.get("pdfFile");
                         url=   fileService.convertForView(pdfFile);
-//                        pdfFile.delete();
+                        pdfFile.delete();
                         LOGGER.info("pdf文件成功生成，并且转换成swf文件成功=" + pdfFile);
                     }
                 }
