@@ -12,4 +12,11 @@ dependencies {
     compile "joda-time:joda-time:$jodaTimeVersion"
     compile "com.fasterxml.jackson.core:jackson-core:$fastxmlVersion"
     compile "com.fasterxml.jackson.core:jackson-databind:$fastxmlVersion"
+    //加入openoffice
+    compile "com.artofsolving:jodconverter:2.2.2"
+    compile "org.openoffice:jurt:3.0.1"
+    compile "org.openoffice:ridl:3.0.1"
+    compile "org.openoffice:juh:3.0.1"
+    compile "org.openoffice:unoil:3.0.1"
+//    compile "org.slf4j:slf4j:1.4.3:jdk14"
 }
