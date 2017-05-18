@@ -10,7 +10,8 @@
         FFM.DEST_NAME   AS FFM_DEST_NAME,
         FFM.SUFFIX      AS FFM_SUFFIX,
         FFM.SIZE        AS FFM_SIZE,
-        FFM.CREATED_AT  AS FFM_CREATED_AT
+        FFM.CREATED_AT  AS FFM_CREATED_AT,
+        FFM.SWF_FILE_NAME  AS FFM_SWF_FILE_NAME
     </sql>
 
 </mapper>

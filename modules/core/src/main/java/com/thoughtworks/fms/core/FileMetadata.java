@@ -16,4 +16,6 @@ public interface FileMetadata {
 
     DateTime getCreatedAt();
 
+    String getSwfFileName();
+
 }
