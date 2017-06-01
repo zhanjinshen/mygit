@@ -65,7 +65,19 @@ public class FilesResource {
         return Response.created(Routing.file(fileId)).build();
     }
 
-
+    /**
+     * 上传文件 涉及多线程 内存开销比较大 后期并发上来后 需要优化
+     * @param multiPart
+     * @param metadata
+     * @param properties
+     * @param servletRequest
+     * @param fileService
+     * @param validationService
+     * @param clientService
+     * @param sessionService
+     * @return
+     * @throws UnsupportedEncodingException
+     */
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/uploadFileForCredit")
