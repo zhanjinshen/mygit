@@ -33,6 +33,8 @@ public class DefaultFileService implements FileService {
 
     private static final String FILE_SERVERS = PropertiesLoader.getProperty("file.servers");
 
+    private static final String COMPRESSION_RATIO = PropertiesLoader.getProperty("compression.ratio");
+
 
 
 
@@ -186,7 +188,7 @@ public class DefaultFileService implements FileService {
 
     @Override
     public String compressImage(String filePath,String baseName) {
-       return CompressUtil.reduceImg(filePath, baseName,0,0,0.5F);
+       return CompressUtil.reduceImg(filePath, baseName,0,0,Float.valueOf(COMPRESSION_RATIO));
     }
 
     @Override

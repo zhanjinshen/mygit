@@ -36,6 +36,7 @@ import static java.util.stream.Collectors.toList;
 public class FilesResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilesResource.class);
     private final String CONVERTFILETYPE = "pdf,jpg,jpeg,font,gif,png,wav";
+    private final String imageType="jpg,jpeg,png,gif";
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadFile(FormDataMultiPart multiPart,
@@ -88,7 +89,10 @@ public class FilesResource {
         LOGGER.info("服务文件生成路径=" + newFilePath);
         String fileExtensionName= FilenameUtils.getExtension(newFilePath);
         //图片压缩处理（处理完后再对压缩后的文件进行处理时会有问题）
-       String compressFile=fileService.compressImage(newFilePath,FilenameUtils.getBaseName(newFilePath));
+        String compressFile="";
+        if(imageType.indexOf(fileExtensionName)>-1) {
+            compressFile= fileService.compressImage(newFilePath, FilenameUtils.getBaseName(newFilePath));
+        }
         //对图片进行压缩处理
         long fileId;
         String url ="";
@@ -98,9 +102,9 @@ public class FilesResource {
                     LOGGER.info("除pdf格式外的文件开始执行转换");
                     File newFile = new File(compressFile);
                     url = fileService.convertForView(newFile);
+                    LOGGER.info("转换压缩过后的文件失败，准备尝试通过源文件转换！");
+                    newFile.delete();
                    if("".equals(url)){
-                       LOGGER.info("转换压缩过后的文件失败，准备尝试通过源文件转换！");
-                       newFile.delete();
                        LOGGER.info("转换压缩过后的文件失败，正在尝试通过源文件转换！");
                        newFile = new File(newFilePath);
                        url = fileService.convertForView(newFile);
