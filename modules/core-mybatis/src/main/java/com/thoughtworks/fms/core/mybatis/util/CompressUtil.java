@@ -2,6 +2,7 @@ package com.thoughtworks.fms.core.mybatis.util;
 
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import org.apache.commons.io.FilenameUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -14,6 +15,7 @@ public class CompressUtil {
     private Image img;
     private int width;
     private int height;
+    private static final String FILE_SERVERS = PropertiesLoader.getProperty("file.servers");
     @SuppressWarnings("deprecation")
 //    public static void main(String[] args) throws Exception {
 //        System.out.println("开始：" + new Date().toLocaleString());
@@ -33,12 +35,12 @@ public class CompressUtil {
         //File srcfile = new File("E:\\test\\02.jpg");
         File srcfile = new File("E:\\test\\公积金合同 (2).jpg");
         System.out.println("压缩前srcfile size:" + srcfile.length());
-        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\05test.png", 0, 0,0.5F);
-        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\06test.png", 0, 0,0.6F);
-        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\07test.png", 0, 0,0.7F);
-        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\08test.png", 0, 0,0.8F);
-        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\09test.png", 0, 0,0.9F);
-        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\10test.png", 0, 0,1F);
+        reduceImg("E:\\test\\02.png", "E:\\test\\05test.png", 0, 0,0.5F);
+//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\06test.png", 0, 0,0.6F);
+//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\07test.png", 0, 0,0.7F);
+//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\08test.png", 0, 0,0.8F);
+//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\09test.png", 0, 0,0.9F);
+//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\10test.png", 0, 0,1F);
         File distfile = new File("E:\\test\\04test.jpg");
         System.out.println("压缩后distfile size:" + distfile.length());
     }
@@ -104,25 +106,29 @@ public class CompressUtil {
      * @param heightdist 压缩后图片高度（当rate==null时，必传）
      * @param rate 压缩比例
      */
-    public static void reduceImg(String imgsrc, String imgdist, int widthdist,
+    public static String reduceImg(String imgsrc, String imgdist, int widthdist,
                                  int heightdist, Float rate) {
         try {
+           String fileName = FilenameUtils.getExtension(imgsrc);
+            imgdist= FILE_SERVERS + "/"+ "temp"+"/" + imgdist +"."+fileName;
             File srcfile = new File(imgsrc);
+
             // 检查文件是否存在
             if (!srcfile.exists()) {
-                return;
+                return null;
             }
             // 如果rate不为空说明是按比例压缩
             if (rate != null && rate > 0) {
                 // 获取文件高度和宽度
                 int[] results = getImgWidth(srcfile);
                 if (results == null || results[0] == 0 || results[1] == 0) {
-                    return;
+                    return null;
                 } else {
                     widthdist = (int) (results[0] * rate);
                     heightdist = (int) (results[1] * rate);
                 }
             }
+
             // 开始读取文件并进行压缩
             Image src = javax.imageio.ImageIO.read(srcfile);
             BufferedImage tag = new BufferedImage((int) widthdist,
@@ -131,7 +137,6 @@ public class CompressUtil {
             tag.getGraphics().drawImage(
                     src.getScaledInstance(widthdist, heightdist,
                             Image.SCALE_SMOOTH), 0, 0, null);
-
             FileOutputStream out = new FileOutputStream(imgdist);
             JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
             encoder.encode(tag);
@@ -140,6 +145,7 @@ public class CompressUtil {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+        return imgdist;
     }
 
     /**
@@ -155,6 +161,8 @@ public class CompressUtil {
         int result[] = { 0, 0 };
         try {
             is = new FileInputStream(file);
+//            JPEGImageDecoder decoder = JPEGCodec.createJPEGDecoder(new FileInputStream( new File("e://1.jpg") ) );
+//            BufferedImage sourceImg = decoder.decodeAsBufferedImage();
             src = javax.imageio.ImageIO.read(is);
             result[0] = src.getWidth(null); // 得到源图宽
             result[1] = src.getHeight(null); // 得到源图高

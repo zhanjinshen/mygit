@@ -11,10 +11,7 @@ import com.thoughtworks.fms.core.Transfer;
 import com.thoughtworks.fms.core.mybatis.exception.FMSErrorCode;
 import com.thoughtworks.fms.core.mybatis.exception.InternalServerException;
 import com.thoughtworks.fms.core.mybatis.exception.InvalidRequestException;
-import com.thoughtworks.fms.core.mybatis.util.ConvertUtil;
-import com.thoughtworks.fms.core.mybatis.util.DateTimeHelper;
-import com.thoughtworks.fms.core.mybatis.util.FileBuilder;
-import com.thoughtworks.fms.core.mybatis.util.PropertiesLoader;
+import com.thoughtworks.fms.core.mybatis.util.*;
 import com.thoughtworks.fms.exception.DecryptionException;
 import com.thoughtworks.fms.exception.EncryptionException;
 import com.thoughtworks.fms.exception.TransferException;
@@ -185,6 +182,11 @@ public class DefaultFileService implements FileService {
     @Override
     public FileMetadata findMetadataById(long fileId) {
         return repository.findMetadataById(fileId);
+    }
+
+    @Override
+    public String compressImage(String filePath,String baseName) {
+       return CompressUtil.reduceImg(filePath, baseName,0,0,0.5F);
     }
 
     @Override

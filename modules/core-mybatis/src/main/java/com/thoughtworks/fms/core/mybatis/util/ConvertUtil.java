@@ -65,7 +65,7 @@ public class ConvertUtil {
 //            pro.waitFor();
 //            pro.exitValue();
         } catch (Exception e) {
-            System.out.println("pdf转换swf失败");
+            LOGGER.info("pdf转换swf失败");
             return url;
         }
         return url;

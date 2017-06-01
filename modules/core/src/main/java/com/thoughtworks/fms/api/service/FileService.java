@@ -32,4 +32,6 @@ public interface FileService {
     public  String saveUploadFileForView(InputStream inputStreamFile,String destName);
 
     public FileMetadata findMetadataById(long fileId);
+
+   String compressImage(String filePath,String baseName);
 }
