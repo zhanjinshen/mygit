@@ -93,6 +93,7 @@ public class ConvertToSwf {
             command.add("-o");
             command.add(swfFilePath);
             command.add("-T 9");
+            command.add("-s");
             command.add(swftoolsLanguage);
             LOGGER.info("linux执行转换swf命令："+command);
             try {
