@@ -100,10 +100,13 @@ public class FilesResource {
             if ("" != newFilePath) {
                 if (CONVERTFILETYPE.indexOf(fileExtensionName)>-1) {
                     LOGGER.info("除pdf格式外的文件开始执行转换");
-                    File newFile = new File(compressFile);
-                    url = fileService.convertForView(newFile);
-                    LOGGER.info("转换压缩过后的文件失败，准备尝试通过源文件转换！");
-                    newFile.delete();
+                    File newFile;
+                    if(null!=compressFile) {
+                        newFile = new File(compressFile);
+                        url = fileService.convertForView(newFile);
+                        LOGGER.info("转换压缩过后的文件失败，准备尝试通过源文件转换！");
+                        newFile.delete();
+                    }
                    if("".equals(url)){
                        LOGGER.info("转换压缩过后的文件失败，正在尝试通过源文件转换！");
                        newFile = new File(newFilePath);
