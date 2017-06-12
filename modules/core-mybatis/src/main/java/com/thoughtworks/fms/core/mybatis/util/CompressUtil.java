@@ -1,7 +1,6 @@
 package com.thoughtworks.fms.core.mybatis.util;
 
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import com.sun.image.codec.jpeg.*;
 import org.apache.commons.io.FilenameUtils;
 
 import javax.imageio.ImageIO;
