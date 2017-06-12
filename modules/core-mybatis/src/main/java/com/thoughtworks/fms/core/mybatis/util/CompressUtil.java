@@ -1,6 +1,5 @@
 package com.thoughtworks.fms.core.mybatis.util;
 
-import com.sun.image.codec.jpeg.*;
 import org.apache.commons.io.FilenameUtils;
 
 import javax.imageio.ImageIO;
@@ -92,8 +91,8 @@ public class CompressUtil {
         File destFile = new File("E:\\test\\03test.png");
         FileOutputStream out = new FileOutputStream(destFile); // 输出到文件流
         // 可以正常实现bmp、png、gif转jpg
-        JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
-        encoder.encode(image); // JPEG编码
+//        JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+//        encoder.encode(image); // JPEG编码
         out.close();
     }
 
@@ -137,8 +136,8 @@ public class CompressUtil {
                     src.getScaledInstance(widthdist, heightdist,
                             Image.SCALE_SMOOTH), 0, 0, null);
             FileOutputStream out = new FileOutputStream(imgdist);
-            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
-            encoder.encode(tag);
+//            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+//            encoder.encode(tag);
             out.close();
 
         } catch (IOException ex) {
