@@ -24,26 +24,26 @@ public class CompressUtil {
 //        System.out.println("结束：" + new Date().toLocaleString());
 //    }
 
-    public static void main(String[] args) {
-        /**
-         * d://3.jpg 源图片
-         * d://31.jpg 目标图片
-         * 压缩宽度和高度都是1000
-         *
-         */
-        System.out.println("压缩图片开始...");
-        //File srcfile = new File("E:\\test\\02.jpg");
-        File srcfile = new File("E:\\test\\公积金合同 (2).jpg");
-        System.out.println("压缩前srcfile size:" + srcfile.length());
-        reduceImg("E:\\test\\02.png", "E:\\test\\05test.png", 0, 0,0.5F);
-//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\06test.png", 0, 0,0.6F);
-//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\07test.png", 0, 0,0.7F);
-//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\08test.png", 0, 0,0.8F);
-//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\09test.png", 0, 0,0.9F);
-//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\10test.png", 0, 0,1F);
-        File distfile = new File("E:\\test\\04test.jpg");
-        System.out.println("压缩后distfile size:" + distfile.length());
-    }
+//    public static void main(String[] args) {
+//        /**
+//         * d://3.jpg 源图片
+//         * d://31.jpg 目标图片
+//         * 压缩宽度和高度都是1000
+//         *
+//         */
+//        System.out.println("压缩图片开始...");
+//        //File srcfile = new File("E:\\test\\02.jpg");
+//        File srcfile = new File("E:\\test\\公积金合同 (2).jpg");
+//        System.out.println("压缩前srcfile size:" + srcfile.length());
+//        reduceImg("E:\\test\\02.png", "E:\\test\\05test.png", 0, 0,0.5F);
+////        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\06test.png", 0, 0,0.6F);
+////        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\07test.png", 0, 0,0.7F);
+////        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\08test.png", 0, 0,0.8F);
+////        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\09test.png", 0, 0,0.9F);
+////        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\10test.png", 0, 0,1F);
+//        File distfile = new File("E:\\test\\04test.jpg");
+//        System.out.println("压缩后distfile size:" + distfile.length());
+//    }
     /**
      * 构造函数
      */
