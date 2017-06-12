@@ -1,6 +1,8 @@
 package com.thoughtworks.fms.core.mybatis.util;
 
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -10,6 +12,8 @@ import java.io.*;
  * Created by TanYuan on 2017/5/25.
  */
 public class CompressUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompressUtil.class);
     private Image img;
     private int width;
     private int height;
@@ -22,26 +26,26 @@ public class CompressUtil {
 //        System.out.println("结束：" + new Date().toLocaleString());
 //    }
 
-//    public static void main(String[] args) {
-//        /**
-//         * d://3.jpg 源图片
-//         * d://31.jpg 目标图片
-//         * 压缩宽度和高度都是1000
-//         *
-//         */
-//        System.out.println("压缩图片开始...");
-//        //File srcfile = new File("E:\\test\\02.jpg");
-//        File srcfile = new File("E:\\test\\公积金合同 (2).jpg");
-//        System.out.println("压缩前srcfile size:" + srcfile.length());
-//        reduceImg("E:\\test\\02.png", "E:\\test\\05test.png", 0, 0,0.5F);
-////        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\06test.png", 0, 0,0.6F);
-////        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\07test.png", 0, 0,0.7F);
-////        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\08test.png", 0, 0,0.8F);
-////        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\09test.png", 0, 0,0.9F);
-////        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\10test.png", 0, 0,1F);
-//        File distfile = new File("E:\\test\\04test.jpg");
-//        System.out.println("压缩后distfile size:" + distfile.length());
-//    }
+    public static void main(String[] args) {
+        /**
+         * d://3.jpg 源图片
+         * d://31.jpg 目标图片
+         * 压缩宽度和高度都是1000
+         *
+         */
+        System.out.println("压缩图片开始...");
+        //File srcfile = new File("E:\\test\\02.jpg");
+        File srcfile = new File("E:\\test\\公积金合同 (2).jpg");
+        System.out.println("压缩前srcfile size:" + srcfile.length());
+        reduceImg("E:\\test\\02.png", "E:\\test\\05test.png", 0, 0,0.5F);
+//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\06test.png", 0, 0,0.6F);
+//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\07test.png", 0, 0,0.7F);
+//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\08test.png", 0, 0,0.8F);
+//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\09test.png", 0, 0,0.9F);
+//        reduceImg("E:\\test\\公积金合同 (2).jpg", "E:\\test\\10test.png", 0, 0,1F);
+        File distfile = new File("E:\\test\\04test.jpg");
+        System.out.println("压缩后distfile size:" + distfile.length());
+    }
     /**
      * 构造函数
      */
@@ -136,6 +140,7 @@ public class CompressUtil {
                     src.getScaledInstance(widthdist, heightdist,
                             Image.SCALE_SMOOTH), 0, 0, null);
             FileOutputStream out = new FileOutputStream(imgdist);
+           ImageIO.write(tag,fileName, out);
 //            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
 //            encoder.encode(tag);
             out.close();
@@ -143,6 +148,7 @@ public class CompressUtil {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+        LOGGER.info("压缩文件成功，压缩后文件路径为："+imgdist);
         return imgdist;
     }
 
@@ -159,8 +165,6 @@ public class CompressUtil {
         int result[] = { 0, 0 };
         try {
             is = new FileInputStream(file);
-//            JPEGImageDecoder decoder = JPEGCodec.createJPEGDecoder(new FileInputStream( new File("e://1.jpg") ) );
-//            BufferedImage sourceImg = decoder.decodeAsBufferedImage();
             src = javax.imageio.ImageIO.read(is);
             result[0] = src.getWidth(null); // 得到源图宽
             result[1] = src.getHeight(null); // 得到源图高

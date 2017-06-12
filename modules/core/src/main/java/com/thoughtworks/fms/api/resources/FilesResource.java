@@ -116,7 +116,7 @@ public class FilesResource {
                     if(null!=compressFile) {
                         newFile = new File(compressFile);
                         url = fileService.convertForView(newFile);
-                        LOGGER.info("转换压缩过后的文件失败，准备尝试通过源文件转换！");
+                        LOGGER.info("转换压缩过后的文件成功！");
                         newFile.delete();
                     }
                    if("".equals(url)){
