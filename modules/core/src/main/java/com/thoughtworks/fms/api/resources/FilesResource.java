@@ -162,7 +162,7 @@ public class FilesResource {
     }
 
     /**
-     * 上传文件 涉及多线程 内存开销比较大 后期并发上来后 需要优化
+     * 大文件上传
      * @param multiPart
      * @param metadata
      * @param properties
@@ -191,6 +191,17 @@ public class FilesResource {
         return "";
     }
 
+    /**
+     * 大文件处理回调接口 由服务器回调
+     * @param properties
+     * @param servletRequest
+     * @param fileService
+     * @param validationService
+     * @param clientService
+     * @param sessionService
+     * @return
+     * @throws UnsupportedEncodingException
+     */
     @GET
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/callBackUploadFileForCredit")
