@@ -113,6 +113,11 @@ public class CompressUtil {
         try {
            String fileName = FilenameUtils.getExtension(imgsrc);
             imgdist= FILE_SERVERS + "/"+ "temp"+"/" + imgdist +"."+fileName;
+            String relativePath = FILE_SERVERS + "/"+ "temp"+"/" ;
+            File folder = new File(relativePath);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
             File srcfile = new File(imgsrc);
 
             // 检查文件是否存在
