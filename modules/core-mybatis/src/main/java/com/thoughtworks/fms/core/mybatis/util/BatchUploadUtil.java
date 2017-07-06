@@ -16,6 +16,7 @@ import java.io.*;
      */
 //    @WebServlet("/uploadFileForCreditForBatchUpload")
     public class  BatchUploadUtil  extends HttpServlet {
+        private static final String BIGFILE_SERVERS = PropertiesLoader.getProperty("bigfile.servers");
 
         private static final long serialVersionUID = 1L;
 
@@ -42,19 +43,19 @@ import java.io.*;
                 }
                 LOGGER.info("chunk:[" + chunk + "] chunks:[" + chunks + "]");
                 //检查文件目录，不存在则创建
-                String relativePath = "/plupload/files/";
-                String realPath = request.getServletContext().getRealPath("");
-                File folder = new File(realPath + relativePath);
-                if (!folder.exists()) {
-                    folder.mkdirs();
-                }
+                //String relativePath = "/plupload/files/";
+                //String realPath = request.getServletContext().getRealPath("");
+//                File folder = new File(realPath + relativePath);
+//                if (!folder.exists()) {
+//                    folder.mkdirs();
+//                }
 
                 //目标文件
-                File destFile = new File(folder, name);
+                File destFile = new File(BIGFILE_SERVERS, name);
                 //文件已存在删除旧文件（上传了同名的文件）
                 if (chunk == 0 && destFile.exists()) {
                     destFile.delete();
-                    destFile = new File(folder, name);
+                    destFile = new File(BIGFILE_SERVERS, name);
                 }
                 //合成文件
                 appendFile(fileInputStream, destFile);
