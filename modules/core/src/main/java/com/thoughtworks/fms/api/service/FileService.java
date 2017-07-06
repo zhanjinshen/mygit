@@ -1,7 +1,10 @@
 package com.thoughtworks.fms.api.service;
 
 import com.thoughtworks.fms.core.FileMetadata;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
@@ -34,4 +37,6 @@ public interface FileService {
     public FileMetadata findMetadataById(long fileId);
 
    String compressImage(String filePath,String baseName);
+
+    public void batchUpload(FormDataMultiPart multiPart, InputStream fileInputStream, HttpServletRequest servletRequest);
 }

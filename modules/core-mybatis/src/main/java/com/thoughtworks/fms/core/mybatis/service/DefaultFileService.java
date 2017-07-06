@@ -16,10 +16,14 @@ import com.thoughtworks.fms.exception.DecryptionException;
 import com.thoughtworks.fms.exception.EncryptionException;
 import com.thoughtworks.fms.exception.TransferException;
 import org.apache.commons.io.FilenameUtils;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -115,8 +119,11 @@ public class DefaultFileService implements FileService {
         } catch (TransferException | IOException | EncryptionException e) {
             throw new InternalServerException(FMSErrorCode.UPLOAD_FILE_FAIL, e);
         }
-
-        return repository.storeMetadataForCredit(sourceName, finalName, "." + suffix, count,swfName);
+        if("".equals(swfName)){
+            return repository.storeMetadata(sourceName, finalName, "." + suffix, count);
+        }else {
+            return repository.storeMetadataForCredit(sourceName, finalName, "." + suffix, count, swfName);
+        }
     }
 
     private String getAcceptedSuffix(String name) {
@@ -189,6 +196,13 @@ public class DefaultFileService implements FileService {
     @Override
     public String compressImage(String filePath,String baseName) {
        return CompressUtil.reduceImg(filePath, baseName,0,0,Float.valueOf(COMPRESSION_RATIO));
+    }
+
+    @Override
+    public void batchUpload(FormDataMultiPart multiPart, InputStream fileInputStream, HttpServletRequest servletRequest) {
+
+            BatchUploadUtil.getBatchUpload(multiPart,fileInputStream,servletRequest);
+
     }
 
     @Override

@@ -102,6 +102,8 @@ public class FilesResource {
         String fileExtensionName= FilenameUtils.getExtension(newFilePath);
         //图片压缩处理（处理完后再对压缩后的文件进行处理时会有问题）
         String compressFile="";
+        //大文件上传
+        //fileService.batchUpload(multiPart,inputStreamForUpload,servletRequest);
         if(imageType.indexOf(fileExtensionName)>-1) {
             compressFile= fileService.compressImage(newFilePath, FilenameUtils.getBaseName(newFilePath));
         }
@@ -152,8 +154,73 @@ public class FilesResource {
             //credit固定路径
             String uri = "/creditAttachment/saveCreditAttachmentByFileId";
             clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, sourceName, destName);
+            if("".equals(url)){
+                url=fileId+"";
+            }
         }
         return url;
+    }
+
+    /**
+     * 上传文件 涉及多线程 内存开销比较大 后期并发上来后 需要优化
+     * @param multiPart
+     * @param metadata
+     * @param properties
+     * @param servletRequest
+     * @param fileService
+     * @param validationService
+     * @param clientService
+     * @param sessionService
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Path("/uploadBigFileForCredit")
+    public String uploadBigFileForCredit(FormDataMultiPart multiPart,
+                                      @FormDataParam("file") FormDataContentDisposition metadata,
+                                      @Context ServerProperties properties,
+                                      @Context HttpServletRequest servletRequest,
+                                      @Context FileService fileService,
+                                      @Context ValidationService validationService,
+                                      @Context ClientService clientService,
+                                      @Context SessionService sessionService) throws UnsupportedEncodingException {
+        InputStream inputStreamForUpload = multiPart.getField("file").getValueAs(InputStream.class);
+        //大文件上传
+        fileService.batchUpload(multiPart,inputStreamForUpload,servletRequest);
+        return "";
+    }
+
+    @GET
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Path("/callBackUploadFileForCredit")
+    public String callBackUploadFileForCredit(
+                                         @Context ServerProperties properties,
+                                         @Context HttpServletRequest servletRequest,
+                                         @Context FileService fileService,
+                                         @Context ValidationService validationService,
+                                         @Context ClientService clientService,
+                                         @Context SessionService sessionService) throws UnsupportedEncodingException {
+        System.out.println(servletRequest.getParameter("fileName")+"@@@@@@@@@@@");
+        String file=servletRequest.getParameter("fileName");
+        File zf = new File(file);
+        String sourceName= zf.getName();
+        String destName=zf.getName();
+        String source="laiyuan";
+        String url ="111111111";
+        long fileId=1L;
+        InputStream inputStreamForUpload=null;
+        try {
+            inputStreamForUpload=  new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        fileId = fileService.storeForCredit(sourceName, destName, inputStreamForUpload, source,url);
+        //credit固定路径
+        String uri = "/creditAttachment/saveCreditAttachmentByFileId";
+        clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, sourceName, destName);
+        System.out.println("成功回调！");
+        return "";
     }
 
     /**
