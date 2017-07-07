@@ -18,6 +18,8 @@ import java.io.*;
     public class  BatchUploadUtil  extends HttpServlet {
         private static final String BIGFILE_SERVERS = PropertiesLoader.getProperty("bigfile.servers");
 
+        private static final String BIGFILE_HANDLE_SCRIPT = PropertiesLoader.getProperty("bigfile.handle.script");
+
         private static final long serialVersionUID = 1L;
 
         private static final int BUFFER_SIZE = 100 * 1024;
@@ -61,6 +63,11 @@ import java.io.*;
                 appendFile(fileInputStream, destFile);
                 if (chunk == chunks - 1) {
                     LOGGER.info("上传完成");
+                    LOGGER.info("上传完成后调用服务器脚本进行文件处理");
+                    String startHandleBigFile = BIGFILE_HANDLE_SCRIPT + name;
+                    LOGGER.info("获取服务器大文件处理脚本命令:" + BIGFILE_HANDLE_SCRIPT);
+                    Process pro = Runtime.getRuntime().exec(startHandleBigFile);
+
                 }else {
                     LOGGER.info("还剩["+(chunks-1-chunk)+"]个块文件");
                 }
