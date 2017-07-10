@@ -4,9 +4,11 @@ package com.thoughtworks.fms.core.mybatis.util;
  * Created by TanYuan on 2017/6/30.
  */
 
+import com.thoughtworks.fms.core.FileRepository;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
@@ -26,13 +28,15 @@ import java.io.*;
 
         private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(BatchUploadUtil.class);
 
+
 //        public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 //            doPost(request, response);
 //        }
 
-        public static void getBatchUpload(FormDataMultiPart multiPart,InputStream fileInputStream, HttpServletRequest request) {
+        public static int getBatchUpload(FormDataMultiPart multiPart,InputStream fileInputStream, HttpServletRequest request) {
             try {
 //                String name = request.getParameter("name");
+                int res;
                 String name = multiPart.getField("name").getValueAs(String.class);
                 Integer chunk = 0, chunks = 0;
                 chunk= multiPart.getField("chunk").getValueAs(Integer.class);
@@ -66,7 +70,14 @@ import java.io.*;
                     LOGGER.info("上传完成后调用服务器脚本进行文件处理");
                     String startHandleBigFile = BIGFILE_HANDLE_SCRIPT + name;
                     LOGGER.info("获取服务器大文件处理脚本命令:" + BIGFILE_HANDLE_SCRIPT);
-                    Process pro = Runtime.getRuntime().exec(startHandleBigFile);
+//                    try {
+//                        Process pro = Runtime.getRuntime().exec(startHandleBigFile);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }finally {
+
+//                    }
+                return  1;
 
                 }else {
                     LOGGER.info("还剩["+(chunks-1-chunk)+"]个块文件");
@@ -74,6 +85,7 @@ import java.io.*;
             } catch (Exception e) {
                 LOGGER.error(e.getMessage());
             }
+            return 0;
 
         }
 //        public static void getBatchUpload(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {

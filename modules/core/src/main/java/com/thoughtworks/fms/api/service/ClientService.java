@@ -6,4 +6,6 @@ public interface ClientService {
 
     void informCredit(String uri, Long fileId, String fileName, String destName);
 
+    void informCreditBigFile(String uri, Long fileId, String fileName, String destName,String source);
+
 }

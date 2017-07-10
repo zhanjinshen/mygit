@@ -116,9 +116,15 @@ public class ReadTxtUtil {
         fileId = fileService.storeForCredit(sourceName, destName, inputStreamForUpload, source,url);
         //credit固定路径
         String uri = "/creditAttachment/saveCreditAttachmentByFileId";
-        clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):fileId, sourceName, destName);
+
+        //在数据库中查询到上传时的来源
         String sourceFileSwfName=fileName.replace(BIGFILE_SERVERS+"\\","").replaceAll(sourceName,"")+source+".swf";
         LOGGER.info("返回对应的swf文件路径为："+sourceFileSwfName);
+        String creditSourceFileName=sourceFileSwfName.substring(0, sourceFileSwfName.indexOf("/"));
+        String creditSource= fileService.findBigFileMetadataBySourceName(creditSourceFileName);
+
+        clientService.informCreditBigFile(uri, null!=url&&""!=url?Long.valueOf(url):fileId, sourceName, destName,creditSource);
+
         return sourceFileSwfName;
     }
 

@@ -27,4 +27,9 @@ public interface FileMetadataMapper {
 
     long updateSwfFileNameMetadataById(@Param("id") long id,@Param("swfFileName") String swfFileName);
 
+    void createMetadataForCreditBigFile(@Param("source") String source,
+                                        @Param("sourceName") String sourceName,
+                                        @Param("piggyback") Map<String, Long> piggyback,
+                                         @Param("suffix") String suffix);
+    String findBigFileMetadataBySourceName(@Param("sourceName") String sourceName);
 }

@@ -14,4 +14,8 @@ public interface FileRepository {
 
     long updateSwfFileNameMetadataById(long fileId,String swfFileName);
 
+    long storeMetadataForCreditBigFile(String source,String sourceName,  String suffix);
+
+    String findBigFileMetadataBySourceName(String sourceName);
+
 }

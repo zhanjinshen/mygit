@@ -201,9 +201,12 @@ public class DefaultFileService implements FileService {
 
     @Override
     public void batchUpload(FormDataMultiPart multiPart, InputStream fileInputStream, HttpServletRequest servletRequest) {
-
-            BatchUploadUtil.getBatchUpload(multiPart,fileInputStream,servletRequest);
-
+            String name = multiPart.getField("name").getValueAs(String.class);
+            String source = servletRequest.getParameter("source");
+            int res=BatchUploadUtil.getBatchUpload(multiPart,fileInputStream,servletRequest);
+            if(res > 0) {
+                repository.storeMetadataForCreditBigFile(source,name,FilenameUtils.getExtension(name));
+            }
     }
 
     @Override
@@ -363,6 +366,11 @@ public class DefaultFileService implements FileService {
         return url.toString();
       }
       return null;
+    }
+
+    @Override
+    public String findBigFileMetadataBySourceName(String sourceName){
+      return   repository.findBigFileMetadataBySourceName(sourceName);
     }
   
 

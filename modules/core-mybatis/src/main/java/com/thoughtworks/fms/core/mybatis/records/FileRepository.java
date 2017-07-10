@@ -55,4 +55,15 @@ public class FileRepository implements com.thoughtworks.fms.core.FileRepository 
         return metadataMapper.updateSwfFileNameMetadataById(fileId,swfFileName);
     }
 
+    @Override
+    public long storeMetadataForCreditBigFile(String source, String sourceName, String suffix) {
+        Map<String, Long> piggyback = new HashMap<>();
+        metadataMapper.createMetadataForCreditBigFile(source,sourceName,piggyback,suffix);
+        return piggyback.get("id");
+    }
+    @Override
+    public  String findBigFileMetadataBySourceName(String sourceName){
+       return   metadataMapper.findBigFileMetadataBySourceName(sourceName);
+    }
+
 }

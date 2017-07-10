@@ -63,6 +63,27 @@ public class RestClient {
         }
     }
 
+    public <T> T postForCreditBigFile(String url, Map entity, Function<Response, T> handler) {
+        Client client = ClientBuilder.newClient();
+        Response response = null;
+        try {
+            long timestamp = new Date().getTime();
+            response = client.target(url)
+                    .request()
+                    .header("MIDAS-TIMESTAMP", timestamp)
+                    .header("MIDAS-SYSTEM", "fms")
+                    .header("MIDAS-MD5", getMd5(entity, timestamp))
+                    .header("filedId", entity.get("fileId"))
+                    .header("filedName", entity.get("fileName"))
+                    .header("creditSource", entity.get("creditSource"))
+                    .post(Entity.json(entity));
+            return handler.apply(response);
+        } finally {
+            closeConnection(response);
+            closeClient(client);
+        }
+    }
+
     public <T> T get(String url, String system, String secret, Function<Response, T> handler) {
         Client client = ClientBuilder.newClient();
         Response response = null;

@@ -62,4 +62,25 @@ public class DefaultClientService implements ClientService {
         });
     }
 
+    @Override
+    public void informCreditBigFile(String uri, Long fileId, String fileName, String destName,String creditSource) {
+        //将返回的id存入credit项目
+        Map<String, Object> entity = new HashMap<>();
+        entity.put("fileId", fileId);
+        entity.put("fileName", fileName);
+        entity.put("url", destName);
+        entity.put("creditSource", creditSource);
+        entity.put("name", fileName.split("\\.")[0]);
+        LOGGER.debug("System Log: The callback url of credit is: " + CREDIT_URI + uri);
+        CLIENT.postForCreditBigFile(CREDIT_URI + uri, entity, (Response response) -> {
+//            if (response.getStatus() != HttpStatus.NO_CONTENT_204.getStatusCode()) {
+//                LOGGER.error("System Log: Error callback credit with status:{} detail message: {}",
+//                        response.getStatus(), response);
+//                throw new InternalServerException(FMSErrorCode.SERVER_INTERNAL_ERROR);
+//            }
+            return null;
+        });
+    }
+
+
 }

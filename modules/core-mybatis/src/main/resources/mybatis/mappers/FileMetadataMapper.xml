@@ -36,4 +36,16 @@
         WHERE ID=#{id}
     </update>
 
+    <insert id="createMetadataForCreditBigFile" useGeneratedKeys="true" keyProperty="piggyback.id" keyColumn="id">
+        INSERT INTO FMS_BIG_FILE_METADATA(SOURCE,SOURCE_NAME, SUFFIX)
+        VALUES (#{source},#{sourceName},#{suffix})
+    </insert>
+
+    <select id="findBigFileMetadataBySourceName" resultType="String">
+        SELECT
+        SOURCE
+        FROM FMS_BIG_FILE_METADATA
+        WHERE SOURCE_NAME LIKE "%"#{sourceName}"%"
+    </select>
+
 </mapper>

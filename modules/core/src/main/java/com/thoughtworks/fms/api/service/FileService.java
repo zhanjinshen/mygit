@@ -41,4 +41,6 @@ public interface FileService {
     public void batchUpload(FormDataMultiPart multiPart, InputStream fileInputStream, HttpServletRequest servletRequest);
 
     public void readTxtFile(String fileName, FileService fileService, ClientService clientService);
+
+    public String findBigFileMetadataBySourceName(String sourceName);
 }
