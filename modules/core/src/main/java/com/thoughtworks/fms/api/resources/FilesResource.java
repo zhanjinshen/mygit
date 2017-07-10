@@ -188,7 +188,7 @@ public class FilesResource {
         InputStream inputStreamForUpload = multiPart.getField("file").getValueAs(InputStream.class);
         //大文件上传
         fileService.batchUpload(multiPart,inputStreamForUpload,servletRequest);
-        return "";
+        return "上传成功";
     }
 
     /**
@@ -212,26 +212,48 @@ public class FilesResource {
                                          @Context ValidationService validationService,
                                          @Context ClientService clientService,
                                          @Context SessionService sessionService) throws UnsupportedEncodingException {
-        System.out.println(servletRequest.getParameter("fileName")+"@@@@@@@@@@@");
-        String file=servletRequest.getParameter("fileName");
-        File zf = new File(file);
-        String sourceName= zf.getName();
-        String destName=zf.getName();
-        String source="laiyuan";
-        String url ="111111111";
-        long fileId=1L;
-        InputStream inputStreamForUpload=null;
-        try {
-            inputStreamForUpload=  new FileInputStream(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        fileId = fileService.storeForCredit(sourceName, destName, inputStreamForUpload, source,url);
-        //credit固定路径
-        String uri = "/creditAttachment/saveCreditAttachmentByFileId";
-        clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, sourceName, destName);
-        System.out.println("成功回调！");
-        return "";
+        //System.out.println(servletRequest.getParameter("fileName")+"@@@@@@@@@@@");
+
+        String fileName=servletRequest.getParameter("fileName");
+        fileService.readTxtFile(fileName,fileService,clientService);
+//        File file = new File(fileName);
+//        Long startTime=System.currentTimeMillis();
+//        int i=0;
+//        int totalFileNum=0;
+//        LOGGER.info("接收到服务器回调的文件路径为"+fileName);
+//        LOGGER.info("回调处理开始："+startTime);
+//        StringBuilder result = new StringBuilder();
+//        try {
+//            String encoding="UTF-8";
+//            if(file.isFile() && file.exists()){ //判断文件是否存在
+//                InputStreamReader read = new InputStreamReader(
+//                        new FileInputStream(file),encoding);//考虑到编码格式
+//                BufferedReader bufferedReader = new BufferedReader(read);
+//                String lineTxt;
+//                while((lineTxt = bufferedReader.readLine()) != null){
+//                    System.out.println(lineTxt);//逐行读取文件后进行处理
+//                    totalFileNum=i++;
+//                    LOGGER.info("逐条信息索引为："+totalFileNum+"逐条读取文件内容，内容为："+lineTxt);
+//                    if(lineTxt.indexOf(".swf")<0){
+//                    batchUploadFileToOss(fileService,clientService,lineTxt);
+//                    }
+//                }
+//                read.close();
+//            }else{
+//                System.out.println("找不到指定的文件");
+//            }
+//        } catch (Exception e) {
+//            System.out.println("读取文件内容出错");
+//            e.printStackTrace();
+//        }
+//        System.out.println("成功回调！");
+//        Long endTime=System.currentTimeMillis();
+//        Long consumeTime=endTime-startTime;
+//        LOGGER.info("回调处理开始时间："+startTime);
+//        LOGGER.info("回调处理完成时间："+endTime);
+//        LOGGER.info("回调处理完成,总耗时："+consumeTime);
+//        LOGGER.info("回调处理完成,处理总文件："+totalFileNum);
+        return "处理完成";
     }
 
     /**
@@ -390,6 +412,39 @@ public class FilesResource {
         final File swfFile = fileService.fetchForCredit(fileIdsList, fileName);
        return swfFile.getPath();
     }
+
+//    private String batchUploadFileToOss(FileService fileService,ClientService clientService,String fileName) throws UnsupportedEncodingException {
+//        File zf = new File(fileName);
+//        String sourceName= zf.getName();
+//        String destName=zf.getName();
+//        String source=FilenameUtils.getBaseName(fileName);
+//
+////        File f=new File(fileName);
+////        String c=f.getParent();
+////        File mm=new File(c+File.pathSeparator+System.currentTimeMillis()+".swf");
+////        if(f.renameTo(mm))
+////        {
+////            System.out.println("修改成功!");
+////        }
+////        else
+////        {
+////            System.out.println("修改失败");
+////        }
+////        String url =FilenameUtils.getBaseName(fileName);
+//        String url ="";
+//        long fileId=1L;
+//        InputStream inputStreamForUpload=null;
+//        try {
+//            inputStreamForUpload=  new FileInputStream(fileName);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        fileId = fileService.storeForCredit(sourceName, destName, inputStreamForUpload, source,url);
+//        //credit固定路径
+//        String uri = "/creditAttachment/saveCreditAttachmentByFileId";
+//        clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, sourceName, destName);
+//        return url;
+//    }
 
 
     private String getContentDispositionFileName(String userAgent, String fileName) throws UnsupportedEncodingException {

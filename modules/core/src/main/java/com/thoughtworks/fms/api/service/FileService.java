@@ -39,4 +39,6 @@ public interface FileService {
    String compressImage(String filePath,String baseName);
 
     public void batchUpload(FormDataMultiPart multiPart, InputStream fileInputStream, HttpServletRequest servletRequest);
+
+    public void readTxtFile(String fileName, FileService fileService, ClientService clientService);
 }

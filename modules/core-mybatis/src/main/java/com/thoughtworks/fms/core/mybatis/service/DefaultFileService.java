@@ -3,6 +3,7 @@ package com.thoughtworks.fms.core.mybatis.service;
 import com.aliyun.oss.ClientConfiguration;
 import com.aliyun.oss.OSSClient;
 import com.google.common.base.Splitter;
+import com.thoughtworks.fms.api.service.ClientService;
 import com.thoughtworks.fms.api.service.FileService;
 import com.thoughtworks.fms.core.Cipher;
 import com.thoughtworks.fms.core.FileMetadata;
@@ -203,6 +204,11 @@ public class DefaultFileService implements FileService {
 
             BatchUploadUtil.getBatchUpload(multiPart,fileInputStream,servletRequest);
 
+    }
+
+    @Override
+    public void readTxtFile(String fileName, FileService fileService, ClientService clientService) {
+        ReadTxtUtil.readTxtFile(fileName,fileService,clientService);
     }
 
     @Override
