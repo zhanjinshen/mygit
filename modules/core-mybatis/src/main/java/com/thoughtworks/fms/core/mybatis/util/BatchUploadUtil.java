@@ -66,9 +66,9 @@ public class BatchUploadUtil extends HttpServlet {
             if (chunk == chunks - 1) {
                 LOGGER.info("上传完成");
                 LOGGER.info("上传完成后调用服务器脚本进行文件处理");
-                String startHandleBigFile = BIGFILE_HANDLE_SCRIPT + name;
+                String startHandleBigFile = BIGFILE_HANDLE_SCRIPT+" "+ name;
                 LOGGER.info("获取服务器大文件处理脚本命令:" + BIGFILE_HANDLE_SCRIPT);
-
+                LOGGER.info("服务器最终执行命令："+startHandleBigFile);
                 Process pro = Runtime.getRuntime().exec(startHandleBigFile);
 
                 return 1;

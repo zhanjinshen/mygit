@@ -185,6 +185,8 @@ public class FilesResource {
                                       @Context ValidationService validationService,
                                       @Context ClientService clientService,
                                       @Context SessionService sessionService) throws UnsupportedEncodingException {
+
+        LOGGER.info("开始大文件上传！");
         InputStream inputStreamForUpload = multiPart.getField("file").getValueAs(InputStream.class);
         //大文件上传
         fileService.batchUpload(multiPart,inputStreamForUpload,servletRequest);
