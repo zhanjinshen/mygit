@@ -119,6 +119,7 @@ public class ReadTxtUtil {
 
         //在数据库中查询到上传时的来源
         String sourceFileSwfName=fileName.replace(BIGFILE_SERVERS+"\\","").replaceAll(sourceName,"")+source+".swf";
+        LOGGER.info("源文件名为："+fileName+"大文件处理文件路径为："+BIGFILE_SERVERS+"需要截取的文件名为："+sourceName+"需要拼接的文件名为："+source);
         LOGGER.info("返回对应的swf文件路径为："+sourceFileSwfName);
         String creditSourceFileName=sourceFileSwfName.substring(0, sourceFileSwfName.indexOf("/"));
         String creditSource= fileService.findBigFileMetadataBySourceName(creditSourceFileName);

@@ -201,8 +201,13 @@ public class DefaultFileService implements FileService {
 
     @Override
     public void batchUpload(FormDataMultiPart multiPart, InputStream fileInputStream, HttpServletRequest servletRequest) {
-            String name = multiPart.getField("name").getValueAs(String.class);
-            LOGGER.info("获取大文件文件名："+name);
+        String name = null;
+        try {
+            name = multiPart.getField("name").getValueAs(String.class).getBytes("ISO-8859-1").toString();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        LOGGER.info("获取大文件文件名："+name);
             String source = servletRequest.getParameter("source");
             LOGGER.info("获取大文件来源："+source);
             LOGGER.info("开始大文件分片上传");
