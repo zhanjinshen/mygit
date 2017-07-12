@@ -47,6 +47,8 @@ public class ReadTxtUtil {
                         LOGGER.info("源文件："+lineTxt+"对应的新生成的swf文件名字为："+sourceFileSwfName);
                     }else{
                         String swfFileName=fileNameMap.get(totalFileNum-1+"").replaceAll("/","_");
+                        LOGGER.info("通过源文件取出的swf文件名为："+swfFileName);
+                        LOGGER.info("通过服务器文件读出的swf文件名为："+lineTxt);
                        // String lineTxtSwfFileName=lineTxt.replaceAll(BIGFILE_SERVERS.toString()+"swf/","");
                         if(lineTxt.indexOf(swfFileName)>-1){
                             renameFileAndCallbackCredit(lineTxt,fileTimeNameMap.get(totalFileNum-1+""));
@@ -118,8 +120,8 @@ public class ReadTxtUtil {
         String uri = "/creditAttachment/saveCreditAttachmentByFileId";
 
         //在数据库中查询到上传时的来源
-        String sourceFileSwfName=fileName.replace(BIGFILE_SERVERS+"\\","").replaceAll(sourceName,"")+source+".swf";
-        LOGGER.info("源文件名为："+fileName+"大文件处理文件路径为："+BIGFILE_SERVERS+"需要截取的文件名为："+sourceName+"需要拼接的文件名为："+source);
+        String sourceFileSwfName=fileName.replace(BIGFILE_SERVERS+"/","").replaceAll(sourceName,"")+source+".swf";
+        LOGGER.info("--源文件名为："+fileName+"--大文件处理文件路径为："+BIGFILE_SERVERS+"--需要截取的文件名为："+sourceName+"--需要拼接的文件名为："+source);
         LOGGER.info("返回对应的swf文件路径为："+sourceFileSwfName);
         String creditSourceFileName=sourceFileSwfName.substring(0, sourceFileSwfName.indexOf("/"));
         String creditSource= fileService.findBigFileMetadataBySourceName(creditSourceFileName);
