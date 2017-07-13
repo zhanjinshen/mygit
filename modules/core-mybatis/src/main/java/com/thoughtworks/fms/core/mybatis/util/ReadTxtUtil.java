@@ -115,6 +115,7 @@ public class ReadTxtUtil {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        LOGGER.info("将上传到阿里oss服务器的文件进行保存：sourceName-->"+sourceName+"-->destName-->"+destName);
         fileId = fileService.storeForCredit(sourceName, destName, inputStreamForUpload, source,url);
         //credit固定路径
         String uri = "/creditAttachment/saveCreditAttachmentByFileId";

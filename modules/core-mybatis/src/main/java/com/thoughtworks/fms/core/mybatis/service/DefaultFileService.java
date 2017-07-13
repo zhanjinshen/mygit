@@ -203,7 +203,7 @@ public class DefaultFileService implements FileService {
     public void batchUpload(FormDataMultiPart multiPart, InputStream fileInputStream, HttpServletRequest servletRequest) {
         String name = null;
         try {
-            name = multiPart.getField("name").getValueAs(String.class).getBytes("ISO-8859-1").toString();
+            name = new String(multiPart.getField("name").toString().getBytes("ISO-8859-1"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
