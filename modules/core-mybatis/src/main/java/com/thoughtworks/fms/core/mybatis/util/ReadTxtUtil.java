@@ -91,8 +91,8 @@ public class ReadTxtUtil {
 
     private static String batchUploadFileToOss(FileService fileService,ClientService clientService,String fileName,String url) throws UnsupportedEncodingException {
         File zf = new File(fileName);
-        String sourceName= new String(zf.getName().getBytes("ISO-8859-1"));
-        String destName=new String(zf.getPath().getBytes("ISO-8859-1"));
+        String sourceName= zf.getName();
+        String destName=zf.getPath();
         String source= FilenameUtils.getBaseName(fileName);
 
 //        File f=new File(fileName);
