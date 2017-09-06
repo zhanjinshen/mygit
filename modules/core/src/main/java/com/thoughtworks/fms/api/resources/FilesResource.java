@@ -98,6 +98,11 @@ public class FilesResource {
         InputStream inputStreamForUpload = multiPart.getField("file").getValueAs(InputStream.class);
         //上传的文件用另一个流进行处理在服务器上生成一个文件
         String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
+        try {
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         LOGGER.info("服务文件生成路径=" + newFilePath);
         String fileExtensionName= FilenameUtils.getExtension(newFilePath);
         //图片压缩处理（处理完后再对压缩后的文件进行处理时会有问题）
@@ -121,12 +126,12 @@ public class FilesResource {
                         LOGGER.info("转换压缩过后的文件成功！");
                         newFile.delete();
                     }
-                   if("".equals(url)){
-                       LOGGER.info("转换压缩过后的文件失败，正在尝试通过源文件转换！");
-                       newFile = new File(newFilePath);
-                       url = fileService.convertForView(newFile);
-                       newFile.delete();
-                   }
+                    if("".equals(url)){
+                        LOGGER.info("转换压缩过后的文件失败，正在尝试通过源文件转换！");
+                        newFile = new File(newFilePath);
+                        url = fileService.convertForView(newFile);
+                        newFile.delete();
+                    }
 
                 } else {
                     LOGGER.info("开始执行转换");
@@ -447,6 +452,42 @@ public class FilesResource {
 //        clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, sourceName, destName);
 //        return url;
 //    }
+
+    @POST
+    @Path("/uploadFileForZjfCredit")
+    public String uploadFileForZjf(@Context HttpServletRequest servletRequest,
+                                 @Context ContainerRequestContext context,
+                                 @Context FileService fileService,
+                                 @Context ClientService clientService) throws IOException {
+
+        String destName = context.getHeaderString("FileName");
+        String source = "zjf_app";
+
+        String sourceName = new String(destName.getBytes("ISO-8859-1"));
+        InputStream inputStream = servletRequest.getInputStream();
+        String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
+        LOGGER.info("服务文件生成路径=" + newFilePath);
+        String fileExtensionName= FilenameUtils.getExtension(newFilePath);
+        String compressFile="", url="";
+        if(imageType.indexOf(fileExtensionName)>-1) {
+            compressFile= fileService.compressImage(newFilePath, FilenameUtils.getBaseName(newFilePath));
+        }
+        File newFile;
+        if(null!=compressFile) {
+            newFile = new File(compressFile);
+            url = fileService.convertForView(newFile);
+            newFile.delete();
+        }
+
+        long fileId = fileService.storeForCredit(sourceName, destName, inputStream, source, url);
+        //回调
+        String uri = "/creditAttachment/saveCreditAttachmentByFileId";
+        clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, destName, sourceName);
+        if("".equals(url)){
+            url=fileId+"";
+        }
+        return url;
+    }
 
 
     private String getContentDispositionFileName(String userAgent, String fileName) throws UnsupportedEncodingException {
