@@ -465,7 +465,7 @@ public class FilesResource {
 
         String sourceName = new String(destName.getBytes("ISO-8859-1"));
         InputStream inputStream = servletRequest.getInputStream();
-        String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
+        String newFilePath = fileService.saveUploadFileForView(inputStream, sourceName);
         LOGGER.info("服务文件生成路径=" + newFilePath);
         String fileExtensionName= FilenameUtils.getExtension(newFilePath);
         String compressFile="", url="";
@@ -479,10 +479,10 @@ public class FilesResource {
             newFile.delete();
         }
 
-        long fileId = fileService.storeForCredit(sourceName, destName, inputStream, source, url);
+        long fileId = fileService.storeForCredit(sourceName, sourceName, inputStream, source, url);
         //回调
         String uri = "/creditAttachment/saveCreditAttachmentByFileId";
-        clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, destName, sourceName);
+        clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, sourceName, sourceName);
         if("".equals(url)){
             url=fileId+"";
         }
