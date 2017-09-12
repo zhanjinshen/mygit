@@ -192,6 +192,21 @@ public class DefaultFileService implements FileService {
     }
 
     @Override
+    public File fetchForCreditBySwf(List<String> fileIdsList, String zipFileName) {
+        List<FileMetadata> metadatas = repository.findMetadataBySwf(fileIdsList);
+        List<Entry> entries = metadatas.stream().parallel()
+                .map(metadata -> {
+                    String fileName = metadata.getDestName() + metadata.getSuffix();
+                    fileName = fileName.replaceAll(".*/(.*)", "$1");
+                    return new Entry(fileName, fetchForCredit(metadata.getDestName()));
+                }).collect(toList());
+        File newFile=  getFileForView(zipFileName, entries);
+        //将新生成的文件名存入数据库
+        repository.updateSwfFileNameMetadataById(Long.valueOf(fileIdsList.get(0)), FilenameUtils.getBaseName(newFile.getAbsolutePath()));
+        return newFile;
+    }
+
+    @Override
     public File fetch(List<Long> fileIds, String zipFileName) {
         List<FileMetadata> metadatas = repository.findMetadataByIds(fileIds);
         List<Entry> entries = metadatas.stream().parallel()

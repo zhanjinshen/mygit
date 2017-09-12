@@ -34,4 +34,6 @@ public interface FileService {
     public FileMetadata findMetadataById(long fileId);
 
    String compressImage(String filePath,String baseName);
+
+    File fetchForCreditBySwf(List<String> fileIdsList, String fileName);
 }

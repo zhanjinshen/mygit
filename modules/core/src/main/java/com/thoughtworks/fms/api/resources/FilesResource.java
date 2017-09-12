@@ -8,6 +8,7 @@ import com.thoughtworks.fms.api.service.FileService;
 import com.thoughtworks.fms.api.service.SessionService;
 import com.thoughtworks.fms.api.service.ValidationService;
 import com.thoughtworks.fms.core.FileMetadata;
+import jdk.internal.util.xml.impl.Input;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
@@ -26,6 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -98,11 +100,6 @@ public class FilesResource {
         InputStream inputStreamForUpload = multiPart.getField("file").getValueAs(InputStream.class);
         //上传的文件用另一个流进行处理在服务器上生成一个文件
         String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
-        try {
-            inputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         LOGGER.info("服务文件生成路径=" + newFilePath);
         String fileExtensionName= FilenameUtils.getExtension(newFilePath);
         //图片压缩处理（处理完后再对压缩后的文件进行处理时会有问题）
@@ -330,6 +327,7 @@ public class FilesResource {
 
         String sourceName = new String(destName.getBytes("ISO-8859-1"));
         InputStream inputStream = servletRequest.getInputStream();
+        InputStream uploadStream = servletRequest.getInputStream();
         String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
         LOGGER.info("服务文件生成路径=" + newFilePath);
         String fileExtensionName= FilenameUtils.getExtension(newFilePath);
@@ -341,10 +339,11 @@ public class FilesResource {
         if(null!=compressFile) {
             newFile = new File(compressFile);
             url = fileService.convertForView(newFile);
+            uploadStream = new FileInputStream(newFile);
             newFile.delete();
         }
 
-        long fileId = fileService.storeForCredit(sourceName, destName, inputStream, source, url);
+        long fileId = fileService.storeForCredit(sourceName, destName, uploadStream, source, url);
         //回调
         String uri = "/creditAttachment/saveCreditAttachmentByFileId";
         clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, destName, sourceName);
@@ -352,6 +351,33 @@ public class FilesResource {
             url=fileId+"";
         }
         return url;
+    }
+
+    @POST
+    @Path("/findFileForZjfCredit")
+    public Response findFileForZjfCredit(@Context FileService fileService,
+                                         @Context ContainerRequestContext context,
+                                         @Context HttpServletRequest servletRequest) throws UnsupportedEncodingException {
+        //
+        String fileIds = servletRequest.getParameter("fileIds");
+        String fileName = servletRequest.getParameter("fileName");
+        String userAgent = servletRequest.getHeader("User-Agent");
+        List<String> fileIdsList = Splitter.on(",").splitToList(fileIds)
+                .stream().collect(toList());
+        final File zipFile = fileService.fetchForCreditBySwf(fileIdsList, fileName);
+
+        StreamingOutput streamingOutput = output -> {
+            try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(zipFile))) {
+                IOUtils.copy(inputStream, output);
+            } finally {
+                zipFile.delete();
+            }
+        };
+
+        return  Response
+                .ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
+                .header("content-disposition", getContentDispositionFileName(userAgent, zipFile.getName()))
+                .build();
     }
 
     private String getContentDispositionFileName(String userAgent, String fileName) throws UnsupportedEncodingException {
