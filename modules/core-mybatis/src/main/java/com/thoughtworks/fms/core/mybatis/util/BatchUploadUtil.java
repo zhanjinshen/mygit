@@ -64,23 +64,20 @@ public class BatchUploadUtil extends HttpServlet {
             //合成文件
             appendFile(fileInputStream, destFile);
             if (chunk == chunks - 1) {
-                throw new RuntimeException();
-//                LOGGER.info("上传完成");
-//                LOGGER.info("上传完成后调用服务器脚本进行文件处理");
-//                String startHandleBigFile = BIGFILE_HANDLE_SCRIPT+" "+ name;
-//                LOGGER.info("获取服务器大文件处理脚本命令:" + BIGFILE_HANDLE_SCRIPT);
-//                LOGGER.info("服务器最终执行命令："+startHandleBigFile);
-//                Process pro = Runtime.getRuntime().exec(startHandleBigFile);
+                LOGGER.info("上传完成");
+                LOGGER.info("上传完成后调用服务器脚本进行文件处理");
+                String startHandleBigFile = BIGFILE_HANDLE_SCRIPT+" "+ name;
+                LOGGER.info("获取服务器大文件处理脚本命令:" + BIGFILE_HANDLE_SCRIPT);
+                LOGGER.info("服务器最终执行命令："+startHandleBigFile);
+                Process pro = Runtime.getRuntime().exec(startHandleBigFile);
 
-                //return 1;
-
+                return 1;
 
             } else {
                 LOGGER.info("还剩[" + (chunks - 1 - chunk) + "]个块文件");
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            throw e;
         }
         return 0;
 

@@ -211,7 +211,7 @@ public class ConvertUtil {
                 bos.write(buffer, 0, bytesRead);// 将文件写入服务器
             }
             bos.close();
-           //stream.close();
+           stream.close();
             return newPathname;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
