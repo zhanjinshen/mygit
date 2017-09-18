@@ -32,4 +32,6 @@ public interface FileService {
     public  String saveUploadFileForView(InputStream inputStreamFile,String destName);
 
     public FileMetadata findMetadataById(long fileId);
+
+    public String saveCmsImg(InputStream fileInputStream, String dstFilePath);
 }

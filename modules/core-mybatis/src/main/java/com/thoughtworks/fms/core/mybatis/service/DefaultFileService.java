@@ -31,7 +31,7 @@ import java.util.zip.ZipOutputStream;
 
 import static java.util.stream.Collectors.toList;
 
-public class DefaultFileService implements FileService {
+    public class DefaultFileService implements FileService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFileService.class);
 
     private static final String FILE_SERVERS = PropertiesLoader.getProperty("file.servers");
@@ -185,6 +185,43 @@ public class DefaultFileService implements FileService {
     @Override
     public FileMetadata findMetadataById(long fileId) {
         return repository.findMetadataById(fileId);
+    }
+
+    @Override
+    public String saveCmsImg(InputStream fileInputStream, String filePath) {
+        String dstFilePath = FILE_SERVERS + filePath;
+        OutputStream outputStream = null;
+        try {
+            File file = new File(dstFilePath);
+            if(!file.exists()){
+                if(!file.getParentFile().exists()){
+                    file.getParentFile().mkdirs();
+                }
+                outputStream = new FileOutputStream(new File(
+                        dstFilePath));
+                int read = 0;
+                byte[] bytes = new byte[1024];
+
+                outputStream = new FileOutputStream(new File(dstFilePath));
+                while ((read = fileInputStream.read(bytes)) != -1) {
+                    outputStream.write(bytes, 0, read);
+                }
+            }else{
+                LOGGER.info("the pic already exist.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally{
+            try {
+                fileInputStream.close();
+                outputStream.flush();
+                outputStream.close();
+            } catch (IOException e) {
+                LOGGER.error("close stream defeat");
+                e.printStackTrace();
+            }
+        }
+        return  dstFilePath;
     }
 
     @Override

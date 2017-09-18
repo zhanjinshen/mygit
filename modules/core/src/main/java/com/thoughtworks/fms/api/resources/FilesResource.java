@@ -1,5 +1,7 @@
 package com.thoughtworks.fms.api.resources;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Splitter;
 import com.thoughtworks.fms.api.Json;
 import com.thoughtworks.fms.api.filter.SystemAuthentication;
@@ -26,6 +28,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -238,6 +242,51 @@ public class FilesResource {
         return getResponse(fileService, fileIds, fileName, userAgent);
     }
 
+    @POST
+    @Path("/uploadCmsImgTrans")
+    @Produces("application/json;charset=UTF-8")
+    public String uploadCmsImgTrans( Map request,
+                                     @Context FileService fileService){
+        String fileName = request.get("fileName").toString();
+        InputStream fileInputStream = (InputStream) request.get("file");
+        ObjectNode result = new ObjectMapper().createObjectNode();
+        if (fileInputStream == null) {
+            result.put("ret_code", 10001);
+            result.put("ret_msg", "Illegal Parameters");
+            return result.toString();
+        }
+        fileName = UUID.randomUUID().toString()+"_"+new SimpleDateFormat("yyyy-MM-dd").format(new Date())+"."+fileName.split("\\.")[1];
+        //存储路径
+        String dstFilePath = fileService.saveCmsImg(fileInputStream, fileName);
+        result.put("uriPath",dstFilePath);
+        return result.toString();
+    }
+
+    @POST
+    @Path("/uploadCmsImg")
+    @Produces("application/json;charset=UTF-8")
+    public String uploadCmsImg(
+            @FormDataParam("directory") String directory,
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
+            @Context FileService fileService){
+
+        directory = directory==null?"":directory+File.separator;
+
+        ObjectNode result = new ObjectMapper().createObjectNode();
+        if (fileInputStream == null) {
+            result.put("ret_code", 10001);
+            result.put("ret_msg", "Illegal Parameters");
+            return result.toString();
+        }
+        String fileName = contentDispositionHeader.getFileName();
+        fileName = UUID.randomUUID().toString()+"_"+new SimpleDateFormat("yyyy-MM-dd").format(new Date())+"."+fileName.split("\\.")[1];
+        //存储路径
+        String filePath = directory+ fileName;
+        String dstFilePath = fileService.saveCmsImg(fileInputStream, filePath);
+        result.put("uriPath",dstFilePath);
+        return result.toString();
+    }
     private Response getResponse(FileService fileService, String fileIds, String fileName, String userAgent) throws UnsupportedEncodingException {
         List<Long> fileIdsList = Splitter.on(",").splitToList(fileIds)
                 .stream().map(Long::valueOf).collect(toList());
