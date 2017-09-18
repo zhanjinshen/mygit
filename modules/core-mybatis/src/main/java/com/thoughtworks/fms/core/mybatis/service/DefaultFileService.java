@@ -32,10 +32,10 @@ import java.util.zip.ZipOutputStream;
 import static java.util.stream.Collectors.toList;
 
     public class DefaultFileService implements FileService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFileService.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFileService.class);
 
-    private static final String FILE_SERVERS = PropertiesLoader.getProperty("file.servers");
-
+        private static final String FILE_SERVERS = PropertiesLoader.getProperty("file.servers");
+        private static final String FILE_VIEW = PropertiesLoader.getProperty("file.view");
 
 
 
@@ -221,7 +221,8 @@ import static java.util.stream.Collectors.toList;
                 e.printStackTrace();
             }
         }
-        return  dstFilePath;
+        String viewFilePath = FILE_VIEW+filePath;
+        return  viewFilePath;
     }
 
     @Override
