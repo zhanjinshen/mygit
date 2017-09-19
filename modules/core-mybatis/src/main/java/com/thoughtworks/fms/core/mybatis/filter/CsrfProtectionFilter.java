@@ -66,6 +66,14 @@ public class CsrfProtectionFilter implements ContainerRequestFilter {
 
             return;
         }
+        if (method.equals("POST")&&url.indexOf("uploadCmsImgTrans")>0) {
+            if (Objects.isNull(cookie)) {
+                LOGGER.debug("System Log: set csrf cookie");
+                response.addHeader("SET-COOKIE", buildCookieHeader(generateCsrfCookie(CSRF_COOKIE_NAME)));
+            }
+
+            return;
+        }
 
         // IE 8,9 compatible issue
         if (method.equals("POST") && (userAgent.contains("MSIE 9.0") ||userAgent.contains("MSIE 8.0"))

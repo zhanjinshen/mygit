@@ -244,21 +244,20 @@ public class FilesResource {
 
     @POST
     @Path("/uploadCmsImgTrans")
-    @Produces("application/json;charset=UTF-8")
-    public String uploadCmsImgTrans( Map request,
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public String uploadCmsImgTrans( @FormDataParam("fileType") String fileType,
+                                     @FormDataParam("file") InputStream inputStream,
                                      @Context FileService fileService){
-        String fileName = request.get("fileName").toString();
-        InputStream fileInputStream = (InputStream) request.get("file");
         ObjectNode result = new ObjectMapper().createObjectNode();
-        if (fileInputStream == null) {
+        if (inputStream == null) {
             result.put("ret_code", 10001);
             result.put("ret_msg", "Illegal Parameters");
             return result.toString();
         }
-        fileName = UUID.randomUUID().toString()+"_"+new SimpleDateFormat("yyyy-MM-dd").format(new Date())+"."+fileName.split("\\.")[1];
+        String fileName = UUID.randomUUID().toString()+"_"+new SimpleDateFormat("yyyy-MM-dd").format(new Date())+fileType;
         //存储路径
-        String dstFilePath = fileService.saveCmsImg(fileInputStream, fileName);
-        result.put("uriPath",dstFilePath);
+        String dstFilePath = fileService.saveCmsImg(inputStream, fileName);
+        result.put("uriPath","/ueditor/jsp/upload/images/"+fileName);
         return result.toString();
     }
 
