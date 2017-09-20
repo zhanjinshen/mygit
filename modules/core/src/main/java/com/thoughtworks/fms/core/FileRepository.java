@@ -14,4 +14,5 @@ public interface FileRepository {
 
     long updateSwfFileNameMetadataById(long fileId,String swfFileName);
 
+    List<FileMetadata> findMetadataBySwf(List<String> fileIdsList);
 }
