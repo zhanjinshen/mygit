@@ -36,6 +36,7 @@ import static java.util.stream.Collectors.toList;
 public class FilesResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilesResource.class);
     private final String CONVERTFILETYPE = "pdf,jpg,jpeg,font,gif,png,wav";
+    private final String imageType="jpg,jpeg,png,gif";
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadFile(FormDataMultiPart multiPart,
@@ -64,7 +65,19 @@ public class FilesResource {
         return Response.created(Routing.file(fileId)).build();
     }
 
-
+    /**
+     * 上传文件 涉及多线程 内存开销比较大 后期并发上来后 需要优化
+     * @param multiPart
+     * @param metadata
+     * @param properties
+     * @param servletRequest
+     * @param fileService
+     * @param validationService
+     * @param clientService
+     * @param sessionService
+     * @return
+     * @throws UnsupportedEncodingException
+     */
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/uploadFileForCredit")
@@ -83,19 +96,36 @@ public class FilesResource {
         //这里将文件实例化为两个流，一个用作oss上传一个用作文件转换，感觉写法有点尴尬，目前没有什么比较好的处理办法
         InputStream inputStream = multiPart.getField("file").getValueAs(InputStream.class);
         InputStream inputStreamForUpload = multiPart.getField("file").getValueAs(InputStream.class);
+        //上传的文件用另一个流进行处理在服务器上生成一个文件
         String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
-        System.out.println("文件生成路径：" + newFilePath);
-        LOGGER.info("文件生成路径=" + newFilePath);
-
+        LOGGER.info("服务文件生成路径=" + newFilePath);
+        String fileExtensionName= FilenameUtils.getExtension(newFilePath);
+        //图片压缩处理（处理完后再对压缩后的文件进行处理时会有问题）
+        String compressFile="";
+        if(imageType.indexOf(fileExtensionName)>-1) {
+            compressFile= fileService.compressImage(newFilePath, FilenameUtils.getBaseName(newFilePath));
+        }
+        //对图片进行压缩处理
         long fileId;
         String url ="";
         try {
             if ("" != newFilePath) {
-                if (CONVERTFILETYPE.indexOf(FilenameUtils.getExtension(newFilePath))>-1) {
+                if (CONVERTFILETYPE.indexOf(fileExtensionName)>-1) {
                     LOGGER.info("除pdf格式外的文件开始执行转换");
-                    File newFile = new File(newFilePath);
-                    url=  fileService.convertForView(newFile);
-                    newFile.delete();
+                    File newFile;
+                    if(null!=compressFile) {
+                        newFile = new File(compressFile);
+                        url = fileService.convertForView(newFile);
+                        LOGGER.info("转换压缩过后的文件成功！");
+                        newFile.delete();
+                    }
+                   if("".equals(url)){
+                       LOGGER.info("转换压缩过后的文件失败，正在尝试通过源文件转换！");
+                       newFile = new File(newFilePath);
+                       url = fileService.convertForView(newFile);
+                       newFile.delete();
+                   }
+
                 } else {
                     LOGGER.info("开始执行转换");
                     Map<String, Object> fileMap = fileService.doc2swf(newFilePath);
@@ -170,12 +200,14 @@ public class FilesResource {
         if (null!=fileMetadata&&null!=fileMetadata.getSwfFileName()&&!"".equals(fileMetadata.getSwfFileName())){
                 return fileMetadata.getSwfFileName();
         }
+        //将文件下载到服务器进行处理
         String swfUrl= getSwfUrlForCredit(fileService, fileIds.toString(), fileName.toString(), userAgent);
         String url ="";
+        String fileExtensionName= FilenameUtils.getExtension(swfUrl);
         try {
             LOGGER.info("（下载）文件转换开始");
             if ("" != swfUrl) {
-                if (CONVERTFILETYPE.indexOf(FilenameUtils.getExtension(swfUrl))>-1) {
+                if (CONVERTFILETYPE.indexOf(fileExtensionName)>-1) {
                     LOGGER.info("除pdf格式外的文件开始执行转换");
                     File newFile = new File(swfUrl);
                     url=  fileService.convertForView(newFile);
@@ -281,6 +313,70 @@ public class FilesResource {
        return swfFile.getPath();
     }
 
+    @POST
+    @Path("/uploadFileForZjfCredit")
+    public String uploadFileForZjf(@Context HttpServletRequest servletRequest,
+                                   @Context ContainerRequestContext context,
+                                   @Context FileService fileService,
+                                   @Context ClientService clientService) throws IOException {
+
+        String destName = context.getHeaderString("FileName");
+        String source = "zjf_app";
+
+        String sourceName = new String(destName.getBytes("ISO-8859-1"));
+        InputStream inputStream = servletRequest.getInputStream();
+        InputStream uploadStream = servletRequest.getInputStream();
+        String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
+        LOGGER.info("服务文件生成路径=" + newFilePath);
+        String fileExtensionName= FilenameUtils.getExtension(newFilePath);
+        String compressFile="", url="";
+        if(imageType.indexOf(fileExtensionName)>-1) {
+            compressFile= fileService.compressImage(newFilePath, FilenameUtils.getBaseName(newFilePath));
+        }
+        File newFile;
+        if(null!=compressFile) {
+            newFile = new File(compressFile);
+            url = fileService.convertForView(newFile);
+            uploadStream = new FileInputStream(newFile);
+            newFile.delete();
+        }
+
+        long fileId = fileService.storeForCredit(sourceName, destName, uploadStream, source, url);
+        //回调
+        String uri = "/creditAttachment/saveCreditAttachmentByFileId";
+        clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, destName, sourceName);
+        if("".equals(url)){
+            url=fileId+"";
+        }
+        return url;
+    }
+
+    @POST
+    @Path("/findFileForZjfCredit")
+    public Response findFileForZjfCredit(@Context FileService fileService,
+                                         @Context ContainerRequestContext context,
+                                         @Context HttpServletRequest servletRequest) throws UnsupportedEncodingException {
+        //
+        String fileIds = servletRequest.getParameter("fileIds");
+        String fileName = servletRequest.getParameter("fileName");
+        String userAgent = servletRequest.getHeader("User-Agent");
+        List<String> fileIdsList = Splitter.on(",").splitToList(fileIds)
+                .stream().collect(toList());
+        final File zipFile = fileService.fetchForCreditBySwf(fileIdsList, fileName);
+
+        StreamingOutput streamingOutput = output -> {
+            try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(zipFile))) {
+                IOUtils.copy(inputStream, output);
+            } finally {
+                zipFile.delete();
+            }
+        };
+
+        return  Response
+                .ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
+                .header("content-disposition", getContentDispositionFileName(userAgent, zipFile.getName()))
+                .build();
+    }
 
     private String getContentDispositionFileName(String userAgent, String fileName) throws UnsupportedEncodingException {
         LOGGER.debug("userAgent=" + userAgent);

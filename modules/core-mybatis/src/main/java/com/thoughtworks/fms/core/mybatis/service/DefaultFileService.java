@@ -11,10 +11,7 @@ import com.thoughtworks.fms.core.Transfer;
 import com.thoughtworks.fms.core.mybatis.exception.FMSErrorCode;
 import com.thoughtworks.fms.core.mybatis.exception.InternalServerException;
 import com.thoughtworks.fms.core.mybatis.exception.InvalidRequestException;
-import com.thoughtworks.fms.core.mybatis.util.ConvertUtil;
-import com.thoughtworks.fms.core.mybatis.util.DateTimeHelper;
-import com.thoughtworks.fms.core.mybatis.util.FileBuilder;
-import com.thoughtworks.fms.core.mybatis.util.PropertiesLoader;
+import com.thoughtworks.fms.core.mybatis.util.*;
 import com.thoughtworks.fms.exception.DecryptionException;
 import com.thoughtworks.fms.exception.EncryptionException;
 import com.thoughtworks.fms.exception.TransferException;
@@ -35,6 +32,8 @@ public class DefaultFileService implements FileService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFileService.class);
 
     private static final String FILE_SERVERS = PropertiesLoader.getProperty("file.servers");
+
+    private static final String COMPRESSION_RATIO = PropertiesLoader.getProperty("compression.ratio");
 
 
 
@@ -185,6 +184,26 @@ public class DefaultFileService implements FileService {
     @Override
     public FileMetadata findMetadataById(long fileId) {
         return repository.findMetadataById(fileId);
+    }
+
+    @Override
+    public String compressImage(String filePath,String baseName) {
+       return CompressUtil.reduceImg(filePath, baseName,0,0,Float.valueOf(COMPRESSION_RATIO));
+    }
+
+    @Override
+    public File fetchForCreditBySwf(List<String> fileIdsList, String zipFileName) {
+        List<FileMetadata> metadatas = repository.findMetadataBySwf(fileIdsList);
+        List<Entry> entries = metadatas.stream().parallel()
+                .map(metadata -> {
+                    String fileName = metadata.getDestName() + metadata.getSuffix();
+                    fileName = fileName.replaceAll(".*/(.*)", "$1");
+                    return new Entry(fileName, fetchForCredit(metadata.getDestName()));
+                }).collect(toList());
+        File newFile=  getFileForView(zipFileName, entries);
+        //将新生成的文件名存入数据库
+        repository.updateSwfFileNameMetadataById(Long.valueOf(fileIdsList.get(0)), FilenameUtils.getBaseName(newFile.getAbsolutePath()));
+        return newFile;
     }
 
     @Override
