@@ -7,6 +7,7 @@ import com.thoughtworks.fms.api.service.ClientService;
 import com.thoughtworks.fms.api.service.FileService;
 import com.thoughtworks.fms.api.service.SessionService;
 import com.thoughtworks.fms.api.service.ValidationService;
+import com.thoughtworks.fms.core.CipherUtils;
 import com.thoughtworks.fms.core.FileMetadata;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -37,6 +38,7 @@ public class FilesResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilesResource.class);
     private final String CONVERTFILETYPE = "pdf,jpg,jpeg,font,gif,png,wav";
     private final String imageType="jpg,jpeg,png,gif";
+    private final String BASE_ENCODE = "89601CD4D2A12A979D1E284DE53E3562";//32位随机数
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadFile(FormDataMultiPart multiPart,
@@ -321,11 +323,29 @@ public class FilesResource {
                                    @Context ClientService clientService) throws IOException {
 
         String destName = context.getHeaderString("FileName");
-        String source = "zjf_app";
+        String midasSystem = context.getHeaderString("MIDAS_SYSTEM");
+        String time = context.getHeaderString("MIDAS_DATE");
 
+        InputStream initStream = servletRequest.getInputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int len;
+        while ((len = initStream.read(buffer)) > -1 ) {
+            baos.write(buffer, 0, len);
+        }
+        baos.flush();
+
+        //check parameters
+        InputStream checkStream = new ByteArrayInputStream(baos.toByteArray());
+        checkParametersBeforeUpload(checkStream, destName, midasSystem, time);
+
+        //compress file
+        InputStream inputStream = new ByteArrayInputStream(baos.toByteArray());
+        InputStream uploadStream = new ByteArrayInputStream(baos.toByteArray());
+
+        String source = "zjf_app";
         String sourceName = new String(destName.getBytes("ISO-8859-1"));
-        InputStream inputStream = servletRequest.getInputStream();
-        InputStream uploadStream = servletRequest.getInputStream();
+
         String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
         LOGGER.info("服务文件生成路径=" + newFilePath);
         String fileExtensionName= FilenameUtils.getExtension(newFilePath);
@@ -385,5 +405,28 @@ public class FilesResource {
         } else {
             return "attachment; filename*=UTF-8''" + URLEncoder.encode(fileName, "UTF-8");
         }
+    }
+
+    private void checkParametersBeforeUpload(InputStream checkStream, String destName, String midasSystem, String time) throws IOException {
+        if (stringCheck(destName) || stringCheck(midasSystem) || stringCheck(time)){
+            throw new RuntimeException("request parameter is empty");
+        }
+
+        byte[] bytes = new byte[checkStream.available()];
+        checkStream.read(bytes);
+
+        Integer num = Integer.valueOf(time.substring(0, 3)) + Integer.valueOf(time.substring(time.length()-3));
+        String encryptStr = CipherUtils.SHAEncode(BASE_ENCODE + destName + time + new String(bytes).substring(0, num));
+
+        if(encryptStr==null || !encryptStr.equals(midasSystem)){
+            throw new RuntimeException("文件比对失败!");
+        }
+    }
+
+    private boolean stringCheck(String str){
+        if(str==null || "".equals(str)){
+            return true;
+        }
+        return false;
     }
 }
