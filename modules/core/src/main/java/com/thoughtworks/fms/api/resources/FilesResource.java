@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -326,22 +327,12 @@ public class FilesResource {
         String midasSystem = context.getHeaderString("MIDAS_SYSTEM");
         String time = context.getHeaderString("MIDAS_DATE");
 
-        InputStream initStream = servletRequest.getInputStream();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len;
-        while ((len = initStream.read(buffer)) > -1 ) {
-            baos.write(buffer, 0, len);
-        }
-        baos.flush();
-
         //check parameters
-        InputStream checkStream = new ByteArrayInputStream(baos.toByteArray());
-        checkParametersBeforeUpload(checkStream, destName, midasSystem, time);
+        checkParametersBeforeUpload(destName, midasSystem, time);
 
         //compress file
-        InputStream inputStream = new ByteArrayInputStream(baos.toByteArray());
-        InputStream uploadStream = new ByteArrayInputStream(baos.toByteArray());
+        InputStream inputStream = servletRequest.getInputStream();
+        InputStream uploadStream = servletRequest.getInputStream();
 
         String source = "zjf_app";
         String sourceName = new String(destName.getBytes("ISO-8859-1"));
@@ -407,16 +398,16 @@ public class FilesResource {
         }
     }
 
-    private void checkParametersBeforeUpload(InputStream checkStream, String destName, String midasSystem, String time) throws IOException {
+    private void checkParametersBeforeUpload(String destName, String midasSystem, String time) throws IOException {
         if (stringCheck(destName) || stringCheck(midasSystem) || stringCheck(time)){
             throw new RuntimeException("request parameter is empty");
         }
 
-        byte[] bytes = new byte[checkStream.available()];
-        checkStream.read(bytes);
+        BigDecimal num1 = new BigDecimal(time.substring(0, 3)).add(new BigDecimal(time.substring(time.length()-3)));
+        BigDecimal num2 = new BigDecimal(time.substring(4, time.length()));
+        BigDecimal num = new BigDecimal(time).multiply(num1.compareTo(BigDecimal.ZERO)==0?BigDecimal.ONE:num1).subtract(num2);
 
-        Integer num = Integer.valueOf(time.substring(0, 3)) + Integer.valueOf(time.substring(time.length()-3));
-        String encryptStr = CipherUtils.SHAEncode(BASE_ENCODE + destName + time + new String(bytes).substring(0, num));
+        String encryptStr = CipherUtils.SHAEncode(BASE_ENCODE + destName + time + num);
 
         if(encryptStr==null || !encryptStr.equals(midasSystem)){
             throw new RuntimeException("文件比对失败!");
