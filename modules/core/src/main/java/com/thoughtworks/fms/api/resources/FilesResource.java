@@ -324,11 +324,11 @@ public class FilesResource {
                                    @Context ClientService clientService) throws IOException {
 
         String destName = context.getHeaderString("FileName");
-        String midasSystem = context.getHeaderString("MIDAS_SYSTEM");
-        String time = context.getHeaderString("MIDAS_DATE");
+        //String midasSystem = context.getHeaderString("MIDAS_SYSTEM");
+        //String time = context.getHeaderString("MIDAS_DATE");
 
         //check parameters
-        checkParametersBeforeUpload(destName, midasSystem, time);
+        //checkParametersBeforeUpload(destName, midasSystem, time);
 
         //compress file
         InputStream inputStream = servletRequest.getInputStream();
