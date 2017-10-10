@@ -19,7 +19,7 @@ public class ReadTxtUtil {
     private static final String FILE_ENCODING =PropertiesLoader.getProperty("file.encoding");
     private static final String FILE_SERVERS = PropertiesLoader.getProperty("file.servers");
 
-    public static void readTxtFile(String fileName, FileService fileService, ClientService clientService) {
+    public static void readTxtFile(String fileName, FileService fileService, ClientService clientService, String sourceId) {
         File file = new File(fileName);
         Long startTime = System.currentTimeMillis();
         int i = 0;
@@ -41,7 +41,7 @@ public class ReadTxtUtil {
                     totalFileNum = i++;
                     LOGGER.info("逐条信息索引为：" + totalFileNum + "逐条读取文件内容，内容为：" + lineTxt);
                     if (lineTxt.indexOf(".swf") < 0) {
-                        String sourceFileSwfName=batchUploadFileToOss(fileService, clientService, lineTxt,newSwfFileName);
+                        String sourceFileSwfName=batchUploadFileToOss(fileService, clientService, lineTxt,newSwfFileName, sourceId);
                         fileNameMap.put(totalFileNum+"",sourceFileSwfName);
                         fileTimeNameMap.put(totalFileNum+"",newSwfFileName);
                         LOGGER.info("源文件："+lineTxt+"对应的新生成的swf文件名字为："+sourceFileSwfName);
@@ -64,22 +64,6 @@ public class ReadTxtUtil {
             System.out.println("读取文件内容出错");
             e.printStackTrace();
         }
-//        File zf = new File(fileName);
-//        String sourceName= zf.getName();
-//        String destName=zf.getName();
-//        String source="laiyuan";
-//        String url ="111111111";
-//        long fileId=1L;
-//        InputStream inputStreamForUpload=null;
-//        try {
-//            inputStreamForUpload=  new FileInputStream(fileName);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        fileId = fileService.storeForCredit(sourceName, destName, inputStreamForUpload, source,url);
-//        //credit固定路径
-//        String uri = "/creditAttachment/saveCreditAttachmentByFileId";
-//        clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, sourceName, destName);
         System.out.println("成功回调！");
         Long endTime = System.currentTimeMillis();
         Long consumeTime = endTime - startTime;
@@ -89,25 +73,12 @@ public class ReadTxtUtil {
         LOGGER.info("回调处理完成,处理总文件：" + totalFileNum);
     }
 
-    private static String batchUploadFileToOss(FileService fileService,ClientService clientService,String fileName,String url) throws UnsupportedEncodingException {
+    private static String batchUploadFileToOss(FileService fileService, ClientService clientService, String fileName, String url, String sourceId) throws UnsupportedEncodingException {
         File zf = new File(fileName);
         String sourceName= zf.getName();
         String destName=zf.getPath();
         String source= FilenameUtils.getBaseName(fileName);
 
-//        File f=new File(fileName);
-//        String c=f.getParent();
-//        File mm=new File(c+File.pathSeparator+System.currentTimeMillis()+".swf");
-//        if(f.renameTo(mm))
-//        {
-//            System.out.println("修改成功!");
-//        }
-//        else
-//        {
-//            System.out.println("修改失败");
-//        }
-//        String url =FilenameUtils.getBaseName(fileName);
-        //String url =System.currentTimeMillis()+"";
         long fileId;
         InputStream inputStreamForUpload=null;
         try {
@@ -118,7 +89,7 @@ public class ReadTxtUtil {
         LOGGER.info("将上传到阿里oss服务器的文件进行保存：sourceName-->"+sourceName+"-->destName-->"+destName);
         fileId = fileService.storeForCredit(sourceName, destName, inputStreamForUpload, source,url);
         //credit固定路径
-        String uri = "/creditAttachment/saveCreditAttachmentByFileId";
+        String uri = "/creditAttachment/saveCreditAttachmentByFileIdForBigFile";
 
         //在数据库中查询到上传时的来源
         String sourceFileSwfName=fileName.replace(BIGFILE_SERVERS+"/","").replaceAll(sourceName,"")+source+".swf";
@@ -127,7 +98,7 @@ public class ReadTxtUtil {
         String creditSourceFileName=sourceFileSwfName.substring(0, sourceFileSwfName.indexOf("/"));
         String creditSource= fileService.findBigFileMetadataBySourceName(creditSourceFileName);
 
-        clientService.informCreditBigFile(uri, null!=url&&""!=url?Long.valueOf(url):fileId, sourceName, destName,creditSource);
+        clientService.informCreditBigFile(uri, null!=url&&""!=url?Long.valueOf(url):fileId, sourceName, destName,creditSource, sourceId);
 
         return sourceFileSwfName;
     }

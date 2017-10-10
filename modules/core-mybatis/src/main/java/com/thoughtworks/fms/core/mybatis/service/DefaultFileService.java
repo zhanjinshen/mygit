@@ -22,9 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -215,8 +213,8 @@ public class DefaultFileService implements FileService {
     }
 
     @Override
-    public void readTxtFile(String fileName, FileService fileService, ClientService clientService) {
-        ReadTxtUtil.readTxtFile(fileName,fileService,clientService);
+    public void readTxtFile(String fileName, FileService fileService, ClientService clientService, String sourceId) {
+        ReadTxtUtil.readTxtFile(fileName,fileService,clientService, sourceId);
     }
 
     @Override

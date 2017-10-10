@@ -63,7 +63,7 @@ public class DefaultClientService implements ClientService {
     }
 
     @Override
-    public void informCreditBigFile(String uri, Long fileId, String fileName, String destName,String creditSource) {
+    public void informCreditBigFile(String uri, Long fileId, String fileName, String destName, String creditSource, String sourceId) {
         //将返回的id存入credit项目
         Map<String, Object> entity = new HashMap<>();
         entity.put("fileId", fileId);
@@ -71,6 +71,7 @@ public class DefaultClientService implements ClientService {
         entity.put("url", destName);
         entity.put("creditSource", creditSource);
         entity.put("name", fileName.split("\\.")[0]);
+        entity.put("sourceId", sourceId);
         LOGGER.debug("System Log: The callback url of credit is: " + CREDIT_URI + uri);
         CLIENT.postForCreditBigFile(CREDIT_URI + uri, entity, (Response response) -> {
 //            if (response.getStatus() != HttpStatus.NO_CONTENT_204.getStatusCode()) {

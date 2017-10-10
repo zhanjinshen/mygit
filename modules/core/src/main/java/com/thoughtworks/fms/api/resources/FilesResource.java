@@ -37,6 +37,7 @@ public class FilesResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilesResource.class);
     private final String CONVERTFILETYPE = "pdf,jpg,jpeg,font,gif,png,wav";
     private final String imageType="jpg,jpeg,png,gif";
+    private static String sourceId = "0";
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadFile(FormDataMultiPart multiPart,
@@ -188,6 +189,7 @@ public class FilesResource {
 
         LOGGER.info("开始大文件上传！");
         InputStream inputStreamForUpload = multiPart.getField("file").getValueAs(InputStream.class);
+        sourceId = servletRequest.getParameter("sourceId");
         //大文件上传
         fileService.batchUpload(multiPart,inputStreamForUpload,servletRequest);
         return "上传成功";
@@ -214,47 +216,8 @@ public class FilesResource {
                                          @Context ValidationService validationService,
                                          @Context ClientService clientService,
                                          @Context SessionService sessionService) throws UnsupportedEncodingException {
-        //System.out.println(servletRequest.getParameter("fileName")+"@@@@@@@@@@@");
-
         String fileName=servletRequest.getParameter("fileName");
-        fileService.readTxtFile(fileName,fileService,clientService);
-//        File file = new File(fileName);
-//        Long startTime=System.currentTimeMillis();
-//        int i=0;
-//        int totalFileNum=0;
-//        LOGGER.info("接收到服务器回调的文件路径为"+fileName);
-//        LOGGER.info("回调处理开始："+startTime);
-//        StringBuilder result = new StringBuilder();
-//        try {
-//            String encoding="UTF-8";
-//            if(file.isFile() && file.exists()){ //判断文件是否存在
-//                InputStreamReader read = new InputStreamReader(
-//                        new FileInputStream(file),encoding);//考虑到编码格式
-//                BufferedReader bufferedReader = new BufferedReader(read);
-//                String lineTxt;
-//                while((lineTxt = bufferedReader.readLine()) != null){
-//                    System.out.println(lineTxt);//逐行读取文件后进行处理
-//                    totalFileNum=i++;
-//                    LOGGER.info("逐条信息索引为："+totalFileNum+"逐条读取文件内容，内容为："+lineTxt);
-//                    if(lineTxt.indexOf(".swf")<0){
-//                    batchUploadFileToOss(fileService,clientService,lineTxt);
-//                    }
-//                }
-//                read.close();
-//            }else{
-//                System.out.println("找不到指定的文件");
-//            }
-//        } catch (Exception e) {
-//            System.out.println("读取文件内容出错");
-//            e.printStackTrace();
-//        }
-//        System.out.println("成功回调！");
-//        Long endTime=System.currentTimeMillis();
-//        Long consumeTime=endTime-startTime;
-//        LOGGER.info("回调处理开始时间："+startTime);
-//        LOGGER.info("回调处理完成时间："+endTime);
-//        LOGGER.info("回调处理完成,总耗时："+consumeTime);
-//        LOGGER.info("回调处理完成,处理总文件："+totalFileNum);
+        fileService.readTxtFile(fileName,fileService,clientService, sourceId);
         return "处理完成";
     }
 

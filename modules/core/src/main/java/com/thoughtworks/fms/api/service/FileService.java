@@ -4,7 +4,6 @@ import com.thoughtworks.fms.core.FileMetadata;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
@@ -40,7 +39,7 @@ public interface FileService {
 
     public void batchUpload(FormDataMultiPart multiPart, InputStream fileInputStream, HttpServletRequest servletRequest);
 
-    public void readTxtFile(String fileName, FileService fileService, ClientService clientService);
+    public void readTxtFile(String fileName, FileService fileService, ClientService clientService, String sourceid);
 
     public String findBigFileMetadataBySourceName(String sourceName);
 }

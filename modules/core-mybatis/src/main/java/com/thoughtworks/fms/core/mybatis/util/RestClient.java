@@ -76,6 +76,7 @@ public class RestClient {
                     .header("filedId", entity.get("fileId"))
                     .header("filedName", entity.get("fileName"))
                     .header("creditSource", entity.get("creditSource"))
+                    .header("sourceid", entity.get("sourceid"))
                     .post(Entity.json(entity));
             return handler.apply(response);
         } finally {
