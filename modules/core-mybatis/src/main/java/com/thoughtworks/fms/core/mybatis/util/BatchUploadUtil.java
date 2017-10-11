@@ -35,7 +35,7 @@ public class BatchUploadUtil extends HttpServlet {
         try {
 //                String name = request.getParameter("name");
             int res;
-            String name = multiPart.getField("name").getValueAs(String.class);
+            String name = new String(multiPart.getField("name").getValueAs(String.class).getBytes("ISO-8859-1"));
             Integer chunk = 0, chunks = 0;
             chunk = multiPart.getField("chunk").getValueAs(Integer.class);
             chunks = multiPart.getField("chunks").getValueAs(Integer.class);
@@ -66,7 +66,7 @@ public class BatchUploadUtil extends HttpServlet {
             if (chunk == chunks - 1) {
                 LOGGER.info("上传完成");
                 LOGGER.info("上传完成后调用服务器脚本进行文件处理");
-                String startHandleBigFile = BIGFILE_HANDLE_SCRIPT+" "+ name;
+                String startHandleBigFile = BIGFILE_HANDLE_SCRIPT+" "+ BIGFILE_SERVERS + "/"+ name;
                 LOGGER.info("获取服务器大文件处理脚本命令:" + BIGFILE_HANDLE_SCRIPT);
                 LOGGER.info("服务器最终执行命令："+startHandleBigFile);
                 Process pro = Runtime.getRuntime().exec(startHandleBigFile);
