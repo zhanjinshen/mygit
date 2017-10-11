@@ -37,8 +37,8 @@
     </update>
 
     <insert id="createMetadataForCreditBigFile" useGeneratedKeys="true" keyProperty="piggyback.id" keyColumn="id">
-        INSERT INTO FMS_BIG_FILE_METADATA(SOURCE,SOURCE_NAME, SUFFIX)
-        VALUES (#{source},#{sourceName},#{suffix})
+        INSERT INTO FMS_BIG_FILE_METADATA(SOURCE,SOURCE_NAME, SUFFIX, CREATED_AT)
+        VALUES (#{source},#{sourceName},#{suffix}, NOW())
     </insert>
 
     <select id="findBigFileMetadataBySourceName" resultType="String">
