@@ -202,14 +202,16 @@ public class DefaultFileService implements FileService {
         String name = multiPart.getField("name").getValueAs(String.class);
 
         LOGGER.info("获取大文件文件名："+name);
-            String source = servletRequest.getParameter("source");
-            LOGGER.info("获取大文件来源："+source);
-            LOGGER.info("开始大文件分片上传");
-            int res=BatchUploadUtil.getBatchUpload(multiPart,fileInputStream,servletRequest);
-            if(res > 0) {
-                repository.storeMetadataForCreditBigFile(source,name,FilenameUtils.getExtension(name));
-                LOGGER.info("大文件分片上传完成并且将相关信息持久化到fms数据库中");
-            }
+        String source = servletRequest.getParameter("source");
+        LOGGER.info("获取大文件来源："+source);
+        LOGGER.info("开始大文件分片上传");
+        int res=BatchUploadUtil.getBatchUpload(multiPart,fileInputStream,servletRequest);
+        if(res > 0) {
+            LOGGER.info("大文件分片上传完成并且将相关信息持久化到fms数据库中");
+            String suffix = FilenameUtils.getExtension(name);
+            LOGGER.info("source："+source+" name："+name+" suffix："+suffix);
+            repository.storeMetadataForCreditBigFile(source,name,suffix);
+        }
     }
 
     @Override
