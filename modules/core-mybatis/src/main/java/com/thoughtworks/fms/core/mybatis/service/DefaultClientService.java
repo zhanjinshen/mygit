@@ -73,7 +73,7 @@ public class DefaultClientService implements ClientService {
         entity.put("name", fileName.split("\\.")[0]);
         entity.put("sourceId", sourceId);
         LOGGER.debug("System Log: The callback url of credit is: " + CREDIT_URI + uri);
-        LOGGER.debug("fileId：" + fileId + " fileName："+fileName+ " destName："+destName+" creditSource："+creditSource+" sourceId："+sourceId);
+        LOGGER.info("fileId：" + fileId + " fileName："+fileName+ " destName："+destName+" creditSource："+creditSource+" sourceId："+sourceId);
         CLIENT.postForCreditBigFile(CREDIT_URI + uri, entity, (Response response) -> {
 //            if (response.getStatus() != HttpStatus.NO_CONTENT_204.getStatusCode()) {
 //                LOGGER.error("System Log: Error callback credit with status:{} detail message: {}",
