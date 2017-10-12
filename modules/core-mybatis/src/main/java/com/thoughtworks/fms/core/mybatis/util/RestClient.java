@@ -73,10 +73,12 @@ public class RestClient {
                     .header("MIDAS-TIMESTAMP", timestamp)
                     .header("MIDAS-SYSTEM", "fms")
                     .header("MIDAS-MD5", getMd5(entity, timestamp))
-                    .header("filedId", entity.get("fileId"))
+                    .header("fileId", entity.get("fileId"))
                     .header("filedName", entity.get("fileName"))
                     .header("creditSource", entity.get("creditSource"))
-                    .header("sourceid", entity.get("sourceid"))
+                    .header("url", entity.get("url"))
+                    .header("name", entity.get("name"))
+                    .header("sourceId", entity.get("sourceId"))
                     .post(Entity.json(entity));
             return handler.apply(response);
         } finally {
