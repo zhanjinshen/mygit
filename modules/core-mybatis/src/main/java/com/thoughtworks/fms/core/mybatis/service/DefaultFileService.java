@@ -38,6 +38,9 @@ public class DefaultFileService implements FileService {
 
     private static final String COMPRESSION_RATIO = PropertiesLoader.getProperty("compression.ratio");
 
+    private static final String BIGFILE_SERVERS = PropertiesLoader.getProperty("bigfile.servers");
+
+    private static final String BIGFILE_HANDLE_SCRIPT = PropertiesLoader.getProperty("bigfile.handle.script");
 
 
 
@@ -206,7 +209,20 @@ public class DefaultFileService implements FileService {
         LOGGER.info("获取大文件来源："+source);
         LOGGER.info("开始大文件分片上传");
         int res=BatchUploadUtil.getBatchUpload(multiPart,fileInputStream,servletRequest);
+
         if(res > 0) {
+
+            LOGGER.info("上传完成后调用服务器脚本进行文件处理");
+            String startHandleBigFile = BIGFILE_HANDLE_SCRIPT+" "+ BIGFILE_SERVERS + "/"+ name;
+            LOGGER.info("获取服务器大文件处理脚本命令:" + BIGFILE_HANDLE_SCRIPT);
+            LOGGER.info("服务器最终执行命令："+startHandleBigFile);
+
+            try {
+                Process pro = Runtime.getRuntime().exec(startHandleBigFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             LOGGER.info("大文件分片上传完成并且将相关信息持久化到fms数据库中");
             String suffix = FilenameUtils.getExtension(name);
             LOGGER.info("source："+source+" name："+name+" suffix："+suffix);
