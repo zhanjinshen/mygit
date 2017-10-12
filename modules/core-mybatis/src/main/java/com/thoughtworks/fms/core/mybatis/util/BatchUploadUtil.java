@@ -35,7 +35,7 @@ public class BatchUploadUtil extends HttpServlet {
         try {
 //                String name = request.getParameter("name");
             int res;
-            String name = new String(multiPart.getField("name").getValueAs(String.class).getBytes("ISO-8859-1"));
+            String name = multiPart.getField("name").getValueAs(String.class);
             Integer chunk = 0, chunks = 0;
             chunk = multiPart.getField("chunk").getValueAs(Integer.class);
             chunks = multiPart.getField("chunks").getValueAs(Integer.class);
