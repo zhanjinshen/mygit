@@ -19,6 +19,9 @@ public class ReadTxtUtil {
     private static final String FILE_ENCODING =PropertiesLoader.getProperty("file.encoding");
     private static final String FILE_SERVERS = PropertiesLoader.getProperty("file.servers");
 
+    private static final String CONVERTFILETYPE = "pdf,jpg,jpeg,font,gif,png,wav,JPG";
+    private static final String imageType="jpg,jpeg,png,gif,JPG";
+
     public static void readTxtFile(String fileName, FileService fileService, ClientService clientService, String sourceId) {
         File file = new File(fileName);
         Long startTime = System.currentTimeMillis();
@@ -78,16 +81,44 @@ public class ReadTxtUtil {
         String sourceName= zf.getName();
         String destName=zf.getPath();
         String source= FilenameUtils.getBaseName(fileName);
+        String suffix = FilenameUtils.getExtension(fileName);
 
         long fileId;
-        InputStream inputStreamForUpload=null;
+        url = "";
+        InputStream inputStreamForUpload = null;
         try {
-            inputStreamForUpload=  new FileInputStream(fileName);
-        } catch (FileNotFoundException e) {
+            InputStream inputStream =  new FileInputStream(fileName);
+            String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
+            inputStreamForUpload = new FileInputStream(newFilePath);
+
+            if (CONVERTFILETYPE.indexOf(suffix)>-1) {
+                LOGGER.info("除pdf格式外的文件开始执行转换");
+                File newFile = new File(newFilePath);
+                url = fileService.convertForView(newFile);
+                LOGGER.info("转换文件成功！");
+                newFile.delete();
+            }else {
+                LOGGER.info("开始执行转换");
+                Map<String, Object> fileMap = fileService.doc2swf(newFilePath);
+                if (fileMap.containsKey("docFile")) {
+                    File docFile = (File) fileMap.get("docFile");
+                    url = fileService.convertForView(docFile);
+                    docFile.delete();
+                    LOGGER.info("doc文件成功生成=" + docFile);
+                }
+                if (fileMap.containsKey("pdfFile")) {
+                    File pdfFile = (File) fileMap.get("pdfFile");
+                    url = fileService.convertForView(pdfFile);
+                    pdfFile.delete();
+                    LOGGER.info("pdf文件成功生成，并且转换成swf文件成功=" + pdfFile);
+                }
+            }
+
+        }catch (Exception e) {
             e.printStackTrace();
         }
         LOGGER.info("将上传到阿里oss服务器的文件进行保存：sourceName-->"+sourceName+"-->destName-->"+destName);
-        fileId = fileService.storeForCredit(sourceName, destName, inputStreamForUpload, source,url);
+        fileId = fileService.storeForCredit(sourceName, destName, inputStreamForUpload, source, url);
         //credit固定路径
         String uri = "/creditAttachment/saveCreditAttachmentByFileIdForBigFile";
 
