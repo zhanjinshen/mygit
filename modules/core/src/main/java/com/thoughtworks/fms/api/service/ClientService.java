@@ -8,4 +8,5 @@ public interface ClientService {
 
     void informCreditBigFile(String uri, Long fileId, String fileName, String destName, String source, String sourceId);
 
+    void completeCreditAttachmentForBigFile(String uri, String sourceId, int totalFileNum);
 }

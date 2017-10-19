@@ -84,5 +84,13 @@ public class DefaultClientService implements ClientService {
         });
     }
 
+    @Override
+    public void completeCreditAttachmentForBigFile(String uri, String sourceId, int totalFileNum) {
+        LOGGER.info("uri：" + CREDIT_URI + uri + " sourceId：" + sourceId + " totalFileNum：" + totalFileNum);
+        CLIENT.postForCompleteCreditBigFile(CREDIT_URI + uri, sourceId, totalFileNum, (Response response) -> {
+            return null;
+        });
+    }
+
 
 }

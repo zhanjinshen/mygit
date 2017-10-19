@@ -74,6 +74,11 @@ public class ReadTxtUtil {
         LOGGER.info("回调处理完成时间：" + endTime);
         LOGGER.info("回调处理完成,总耗时：" + consumeTime);
         LOGGER.info("回调处理完成,处理总文件：" + totalFileNum);
+
+        LOGGER.info("将处理结果回调至信贷系统：");
+        String uri = "/creditAttachment/completeCreditAttachmentForBigFile";
+        clientService.completeCreditAttachmentForBigFile(uri, sourceId, totalFileNum);
+
     }
 
     private static String batchUploadFileToOss(FileService fileService, ClientService clientService, String fileName, String url, String sourceId) throws UnsupportedEncodingException {
