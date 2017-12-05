@@ -39,6 +39,7 @@ dependencies {
     compile "org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion"
     compile "org.glassfish.grizzly:grizzly-http-servlet:2.3.15"
     //compile "net.sf.jmimemagic:jmimemagic:0.1.4"
+    compile "com.jcraft:jsch:0.1.53"
 
     compile project(':modules:core')
 
