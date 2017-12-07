@@ -33,6 +33,7 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -315,10 +316,19 @@ public class FilesResource {
         File file = new File( directory);
         String [] fileName = file.list();
         List<Integer> list = new ArrayList<>();
+
+        List<String> fileNameNow = new ArrayList<>();
+        Date d = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        String day = sdf.format(d).substring(4);
+
         for(String name:fileName)
         {
-            list.add(new Integer(name.substring(9,12))+1000);
+            if (day.equals(name.substring(4,8)))
+            fileNameNow.add(name);
         }
+
+        list.addAll(fileNameNow.stream().map(name -> new Integer(name.substring(9, 12)) + 1000).collect(Collectors.toList()));
 
         return Collections.max(list);
     }
