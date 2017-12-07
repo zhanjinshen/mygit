@@ -1,6 +1,9 @@
 package com.thoughtworks.fms.api.resources;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Splitter;
+import com.jcraft.jsch.SftpException;
 import com.thoughtworks.fms.api.Json;
 import com.thoughtworks.fms.api.filter.SystemAuthentication;
 import com.thoughtworks.fms.api.service.ClientService;
@@ -8,6 +11,8 @@ import com.thoughtworks.fms.api.service.FileService;
 import com.thoughtworks.fms.api.service.SessionService;
 import com.thoughtworks.fms.api.service.ValidationService;
 import com.thoughtworks.fms.core.FileMetadata;
+import com.thoughtworks.fms.core.mybatis.util.PropertiesLoader;
+import com.thoughtworks.fms.core.mybatis.util.SFTPUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
@@ -26,9 +31,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.net.URLEncoder;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
@@ -37,6 +41,9 @@ public class FilesResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilesResource.class);
     private final String CONVERTFILETYPE = "pdf,jpg,jpeg,font,gif,png,wav";
     private final String imageType="jpg,jpeg,png,gif";
+
+    private static final String FILE_SERVERS = PropertiesLoader.getProperty("file.servers");
+
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadFile(FormDataMultiPart multiPart,
@@ -257,6 +264,64 @@ public class FilesResource {
         return getResponse(fileService, fileIds, fileName, userAgent);
     }
 
+    @POST
+    @Path("/authorizeFileUpload")
+    @Produces("application/json;charset=UTF-8")
+    public String authorizeFileUpload(
+            @FormDataParam("directory") String directory,
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
+            @Context FileService fileService) throws SftpException {
+
+        directory = directory==null?"":directory+File.separator;
+
+        ObjectNode result = new ObjectMapper().createObjectNode();
+        if (fileInputStream == null) {
+            result.put("ret_code", 10001);
+            result.put("ret_msg", "Illegal Parameters");
+            return result.toString();
+        }
+
+        Date d = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+
+
+        String fileName= contentDispositionHeader.getFileName();
+        String dateNow = sdf.format(d)+ "-001" +"."+fileName.split("\\.")[1];
+
+        if (new File(FILE_SERVERS + directory + dateNow).exists()) {
+            fileName =  dateNow.substring(0,8)+ "-" +String.valueOf(maxNumber(FILE_SERVERS + directory) + 1).substring(1,4)+"."+fileName.split("\\.")[1];
+        }else {
+            fileName = dateNow.toString();
+        }
+
+        //存储路径
+        String filePath = directory+ fileName;
+        String dstFilePath = fileService.saveAurhorizeFile(fileInputStream, filePath);
+
+        SFTPUtil sftp = new SFTPUtil("3000000049", "Jsl00108", "218.104.143.215", 22);
+        sftp.login();
+        sftp.upload("/3000000063/SilentAccount/", fileName, fileInputStream);
+
+        result.put("uriPath",dstFilePath);
+        return result.toString();
+
+    }
+
+
+
+    public Integer maxNumber(String directory) {
+
+        File file = new File( directory);
+        String [] fileName = file.list();
+        List<Integer> list = new ArrayList<>();
+        for(String name:fileName)
+        {
+            list.add(new Integer(name.substring(9,12))+1000);
+        }
+
+        return Collections.max(list);
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)

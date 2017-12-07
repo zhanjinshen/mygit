@@ -36,4 +36,6 @@ public interface FileService {
    String compressImage(String filePath,String baseName);
 
     File fetchForCreditBySwf(List<String> fileIdsList, String fileName);
+
+    public String saveAurhorizeFile(InputStream fileInputStream, String dstFilePath);
 }
