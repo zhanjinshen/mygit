@@ -37,7 +37,7 @@ import static java.util.stream.Collectors.toList;
 @Path("files")
 public class FilesResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilesResource.class);
-    private final String CONVERTFILETYPE = "pdf,jpg,jpeg,font,gif,png,wav,pdf,JPG,JPEG,FONT,GIF,PNG,WAV";
+    private final String CONVERTFILETYPE = "pdf,jpg,jpeg,font,gif,png,wav,PDF,JPG,JPEG,FONT,GIF,PNG,WAV";
     private final String imageType="jpg,jpeg,png,gif,JPG,JPEG,PNG,GIF";
     private final String BASE_ENCODE = "89601CD4D2A12A979D1E284DE53E3562";//32位随机数
     @POST
