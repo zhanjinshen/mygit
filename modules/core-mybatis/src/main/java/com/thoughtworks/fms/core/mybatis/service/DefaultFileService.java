@@ -116,7 +116,12 @@ public class DefaultFileService implements FileService {
             throw new InternalServerException(FMSErrorCode.UPLOAD_FILE_FAIL, e);
         }
 
-        return repository.storeMetadataForCredit(sourceName, finalName, "." + suffix, count,swfName);
+        if("".equals(swfName)){
+            return repository.storeMetadata(sourceName, finalName, "." + suffix, count);
+        }else {
+            return repository.storeMetadataForCredit(sourceName, finalName, "." + suffix, count, swfName);
+        }
+        //return repository.storeMetadataForCredit(sourceName, finalName, "." + suffix, count,swfName);
     }
 
     private String getAcceptedSuffix(String name) {
