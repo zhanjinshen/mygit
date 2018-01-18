@@ -7,6 +7,7 @@ import com.thoughtworks.fms.api.service.ClientService;
 import com.thoughtworks.fms.api.service.FileService;
 import com.thoughtworks.fms.api.service.SessionService;
 import com.thoughtworks.fms.api.service.ValidationService;
+import com.thoughtworks.fms.core.CipherUtils;
 import com.thoughtworks.fms.core.FileMetadata;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -25,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +37,9 @@ import static java.util.stream.Collectors.toList;
 @Path("files")
 public class FilesResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilesResource.class);
-    private final String CONVERTFILETYPE = "pdf,jpg,jpeg,font,gif,png,wav";
-    private final String imageType="jpg,jpeg,png,gif";
+    private final String CONVERTFILETYPE = "pdf,jpg,jpeg,font,gif,png,wav,PDF,JPG,JPEG,FONT,GIF,PNG,WAV";
+    private final String imageType="jpg,jpeg,png,gif,JPG,JPEG,PNG,GIF";
+    private final String BASE_ENCODE = "89601CD4D2A12A979D1E284DE53E3562";//32位随机数
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadFile(FormDataMultiPart multiPart,
@@ -144,6 +147,7 @@ public class FilesResource {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            LOGGER.info("pdf文件转换失败" + e);
         } finally {
             //文件上传到oss
            fileId = fileService.storeForCredit(sourceName, destName, inputStreamForUpload, source,url);
@@ -321,11 +325,19 @@ public class FilesResource {
                                    @Context ClientService clientService) throws IOException {
 
         String destName = context.getHeaderString("FileName");
-        String source = "zjf_app";
+        //String midasSystem = context.getHeaderString("MIDAS_SYSTEM");
+        //String time = context.getHeaderString("MIDAS_DATE");
 
-        String sourceName = new String(destName.getBytes("ISO-8859-1"));
+        //check parameters
+        //checkParametersBeforeUpload(destName, midasSystem, time);
+
+        //compress file
         InputStream inputStream = servletRequest.getInputStream();
         InputStream uploadStream = servletRequest.getInputStream();
+
+        String source = "zjf_app";
+        String sourceName = new String(destName.getBytes("ISO-8859-1"));
+
         String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
         LOGGER.info("服务文件生成路径=" + newFilePath);
         String fileExtensionName= FilenameUtils.getExtension(newFilePath);
@@ -385,5 +397,28 @@ public class FilesResource {
         } else {
             return "attachment; filename*=UTF-8''" + URLEncoder.encode(fileName, "UTF-8");
         }
+    }
+
+    private void checkParametersBeforeUpload(String destName, String midasSystem, String time) throws IOException {
+        if (stringCheck(destName) || stringCheck(midasSystem) || stringCheck(time)){
+            throw new RuntimeException("request parameter is empty");
+        }
+
+        BigDecimal num1 = new BigDecimal(time.substring(0, 3)).add(new BigDecimal(time.substring(time.length()-3)));
+        BigDecimal num2 = new BigDecimal(time.substring(4, time.length()));
+        BigDecimal num = new BigDecimal(time).multiply(num1.compareTo(BigDecimal.ZERO)==0?BigDecimal.ONE:num1).subtract(num2);
+
+        String encryptStr = CipherUtils.SHAEncode(BASE_ENCODE + destName + time + num);
+
+        if(encryptStr==null || !encryptStr.equals(midasSystem)){
+            throw new RuntimeException("文件比对失败!");
+        }
+    }
+
+    private boolean stringCheck(String str){
+        if(str==null || "".equals(str)){
+            return true;
+        }
+        return false;
     }
 }

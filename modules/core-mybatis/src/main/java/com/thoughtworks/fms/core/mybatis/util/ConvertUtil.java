@@ -132,6 +132,7 @@ public class ConvertUtil {
                     throw e;
                 } catch (Exception e) {
                     e.printStackTrace();
+                    LOGGER.error("使用openOffice将文件转成pdf失败--第三种",e);
                     throw e;
                 }
             } else {
