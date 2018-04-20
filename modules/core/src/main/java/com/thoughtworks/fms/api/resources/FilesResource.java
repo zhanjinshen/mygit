@@ -9,6 +9,7 @@ import com.thoughtworks.fms.api.service.SessionService;
 import com.thoughtworks.fms.api.service.ValidationService;
 import com.thoughtworks.fms.core.CipherUtils;
 import com.thoughtworks.fms.core.FileMetadata;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
@@ -333,7 +334,6 @@ public class FilesResource {
 
         //compress file
         InputStream inputStream = servletRequest.getInputStream();
-        InputStream uploadStream = servletRequest.getInputStream();
 
         String source = "zjf_app";
         String sourceName = new String(destName.getBytes("ISO-8859-1"));
@@ -341,24 +341,59 @@ public class FilesResource {
         String newFilePath = fileService.saveUploadFileForView(inputStream, destName);
         LOGGER.info("服务文件生成路径=" + newFilePath);
         String fileExtensionName= FilenameUtils.getExtension(newFilePath);
+        InputStream uploadStream = FileUtils.openInputStream(new File(newFilePath));
+
         String compressFile="", url="";
         if(imageType.indexOf(fileExtensionName)>-1) {
             compressFile= fileService.compressImage(newFilePath, FilenameUtils.getBaseName(newFilePath));
         }
-        File newFile;
-        if(null!=compressFile) {
-            newFile = new File(compressFile);
-            url = fileService.convertForView(newFile);
-            uploadStream = new FileInputStream(newFile);
-            newFile.delete();
-        }
 
-        long fileId = fileService.storeForCredit(sourceName, destName, uploadStream, source, url);
-        //回调
-        String uri = "/creditAttachment/saveCreditAttachmentByFileId";
-        clientService.informCredit(uri, null!=url&&""!=url?Long.valueOf(url):0, destName, sourceName);
-        if("".equals(url)){
-            url=fileId+"";
+        //对图片进行压缩处理
+        try {
+            if ("" != newFilePath) {
+                if (CONVERTFILETYPE.indexOf(fileExtensionName)>-1) {
+                    LOGGER.info("除pdf格式外的文件开始执行转换");
+                    File newFile;
+                    if(null!=compressFile) {
+                        newFile = new File(compressFile);
+                        url = fileService.convertForView(newFile);
+                        LOGGER.info("转换压缩过后的文件成功！");
+                        newFile.delete();
+                    }
+                    if("".equals(url)){
+                        LOGGER.info("转换压缩过后的文件失败，正在尝试通过源文件转换！");
+                        newFile = new File(newFilePath);
+                        url = fileService.convertForView(newFile);
+                        newFile.delete();
+                    }
+
+                } else {
+                    LOGGER.info("开始执行转换");
+                    Map<String, Object> fileMap = fileService.doc2swf(newFilePath);
+                    if (fileMap.containsKey("docFile")) {
+                        File docFile = (File) fileMap.get("docFile");
+                        docFile.delete();
+                        LOGGER.info("doc文件成功生成=" + docFile);
+                    }
+                    if (fileMap.containsKey("pdfFile")) {
+                        File pdfFile = (File) fileMap.get("pdfFile");
+                        url=   fileService.convertForView(pdfFile);
+                        pdfFile.delete();
+                        LOGGER.info("pdf文件成功生成，并且转换成swf文件成功=" + pdfFile);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.info("pdf文件转换失败" + e);
+        } finally {
+            long fileId = fileService.storeForCredit(sourceName, destName, uploadStream, source, url);
+            //回调
+            String uri = "/creditAttachment/saveCreditAttachmentByFileId";
+            clientService.informCredit(uri, null != url && "" != url ? Long.valueOf(url) : 0, destName, sourceName);
+            if ("".equals(url)) {
+                url = fileId + "";
+            }
         }
         return url;
     }
